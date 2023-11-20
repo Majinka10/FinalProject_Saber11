@@ -1,2 +1,2 @@
 # FinalProject_Saber11
-Análisis estadístico de la prueba Saber 11 en Colombia. Exploración detallada de tendencias y factores influyentes en el rendimiento académico a nivel nacional para el proyecto final de Estadística 1
+Este repositorio contiene el análisis estadístico de los datos obtenidos de la prueba Saber 11 en Colombia. Se exploran diversas métricas, tendencias y patrones presentes en los resultados de esta evaluación educativa a nivel nacional. El proyecto examina detalladamente estos datos, utilizando diversas técnicas estadísticas para ofrecer una comprensión profunda de los factores que influyen en el rendimiento académico en el país.
