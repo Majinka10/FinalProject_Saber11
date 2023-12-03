@@ -1,0 +1,288 @@
+---
+title: "Proyecto Final"
+author: "Guillermo Pinto, Carlos García, Jesús Ramírez"
+date: "2023-12-02"
+output:         
+    html_document:      
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data analysis {.tabset}
+
+## Introducción
+
+En el contexto educativo actual, comprender los factores que influyen en
+el rendimiento académico de los estudiantes es fundamental, por esta
+razón, el proyecto se centra en investigar y analizar en profundidad los
+determinantes detrás de los resultados obtenidos en las pruebas Saber
+11. Este examen nacional es un referente clave en la evaluación del
+sistema educativo, y explorar los elementos que impactan estos
+resultados puede ofrecer valiosas perspectivas para mejorar el proceso
+educativo.
+
+Conforme a ello, el análisis se basará en un conjunto de datos de las
+pruebas Saber 11 2022-2, que contiene información sobre los siguientes
+aspectos de los estudiantes:
+
+* Socioeconómico: estrato socioeconómico, nivel educativo de los padres,
+ingresos familiares, etc. 
+
+* Demográfico: región, género, etnia, etc.
+
+* Académico: rendimiento en las pruebas Saber 11, asistencia escolar, etc.
+
+* Familiar: estructura familiar, apoyo parental, etc.
+
+## Paquetes requeridos 
+
+Para reproducir el código y los resultados a lo largo de este proyecto, fue necesario cargar los siguientes paquetes.
+
+- **knitr:** Se utiliza para mostrar una tabla alineada en la pantalla.
+- **DT**: Útil para mostrar datos tabulares de una manera interactiva y configurable, facilitando la exploración y el análisis de los datos.
+
+``` {r packages, eval= FALSE}
+library(knitr)
+library(DT)
+
+```
+
+
+## Preparación de datos {.tabset .tabset-fade}
+
+### Importación de datos
+
+#### Resultados anonimizados de las pruebas Icfes Saber 11 del segundo semestre del año 2022.
+
+El propósito original de los datos es proporcionar información valiosa y
+oportuna sobre estudiantes que participan en las pruebas Saber,
+incluyendo sus resultados académicos y datos socioeconómicos. Estos
+datos, publicados por el Instituto Colombiano para la Evaluación de la
+Educación (Icfes) en el repositorio DataIcfes, buscan contribuir al
+mejoramiento de la calidad educativa en Colombia al ofrecer información
+confiable y pertinente para análisis e investigaciones que incidan
+positivamente en el sistema educativo del país.
+
+Los datos se recopilan principalmente el día que los estudiantes
+presentan la prueba. A partir de las respuestas proporcionadas en el
+cuestionario sociodemográfico y las cinco pruebas en cada área del
+conocimiento, se recopila información personal, de contacto, familiar,
+así como datos del colegio y de citación. Los resultados, que incluyen
+puntajes, percentiles y niveles socioeconómicos, se calculan con base en
+los datos recolectados durante la presentación de las pruebas.
+
+Este conjunto de datos abarca 82 variables que capturan una amplia gama
+de factores socioeconómicos, demográficos y académicos a lo largo de
+532,792 registros. Proporciona información sobre el rendimiento
+académico, antecedentes familiares, instituciones educativas y puntajes
+de pruebas entre estudiantes, cubriendo una amplia gama de contextos
+socioeducativos. Además, ofrece información detallada sobre ubicaciones
+geográficas, distribución de género y acceso a recursos dentro de
+diversas comunidades.
+
+Se puede incontrar más información sobre el conjunto de datos en la
+página del Instituto Colombiano para la Evaluación de la Educación -
+ICFES (2023). *DataIcfes. Saber 11.*
+<https://www.icfes.gov.co/web/guest/data-icfes>
+
+Nuestra exploración de datos inició con la tabla inicial provista por
+[Datos.gov.co](https://www.datos.gov.co/Educaci-n/Saber-11-2019-2/ynam-yc42#),
+revelando una estructura compleja y columnas poco claras. Accedimos al
+diccionario de datos a través de DataIcfes, una base independiente del
+Icfes. Tras solicitar acceso, encontramos información extensa sobre
+pruebas Saber 11 desde 2001 hasta 2022 y escogimos los datos más
+actualizados. A pesar de intentos fallidos de importar archivos .txt en
+R debido al separador '¬', optamos por LibreOffice Calc para
+convertirlos a CSV con separador ','. Posteriormente, logramos importar
+con éxito en R usando read.csv, facilitando nuestro análisis.
+
+```{r import_data}
+ruta_datos <- "SB11_20222.csv"
+data <- read.csv(ruta_datos, sep = ",", dec = ".", header = TRUE, stringsAsFactors = FALSE)
+
+# Verificar la clase del objeto
+class(data)
+# Ver los nombres de las columnas
+colnames(data)
+# Contar la cantidad de registros y columnas
+dim(data)
+```
+
+### Limpieza de datos
+
+#### Datos irrelevantes
+
+La limpieza de datos es crucial para garantizar la precisión y
+coherencia en el análisis. Nuestro proceso de limpieza se basó en pasos
+lógicos y específicos. Primero, identificamos columnas irrelevantes para
+nuestro análisis, eliminándolas para focalizarnos en datos pertinentes.
+
+Las columnas eliminadas abarcaban detalles específicos y contextuales
+poco relevantes para nuestro análisis. Incluían información sobre la
+estructura familiar, ocupación de los padres, alimentación y cantidad de
+habitaciones en el hogar, así como datos relacionados con el tipo de
+documento, nacionalidad, período de presentación del examen, entre
+otros.
+
+Estos detalles, aunque podrían ser importantes en otros contextos, no
+aportaban directamente a nuestras investigaciones sobre la correlación
+entre variables socioeducativas y el rendimiento académico. Su exclusión
+nos permitió concentrarnos en datos más pertinentes y directamente
+vinculados a nuestras áreas de estudio, optimizando así la calidad y
+relevancia de nuestro análisis.
+
+```{r clean_data}
+columnas_irrelevantes <- c(
+"FAMI_PERSONASHOGAR", "FAMI_CUARTOSHOGAR", "FAMI_TRABAJOLABORPADRE", 
+"FAMI_TRABAJOLABORMADRE", "FAMI_COMELECHEDERIVADOS", "FAMI_COMECARNEPESCADOHUEVO", 
+"FAMI_COMECEREALFRUTOSLEGUMBRE", "ESTU_TIPODOCUMENTO", "ESTU_NACIONALIDAD", 
+"ESTU_FECHANACIMIENTO", "PERIODO", "ESTU_CONSECUTIVO", "ESTU_ESTUDIANTE", 
+"ESTU_PAIS_RESIDE", "ESTU_PRIVADO_LIBERTAD", "ESTU_COD_MCPIO_PRESENTACION", 
+"ESTU_MCPIO_PRESENTACION", "ESTU_DEPTO_PRESENTACION", "ESTU_COD_DEPTO_PRESENTACION", 
+"ESTU_INSE_INDIVIDUAL", "ESTU_ESTADOINVESTIGACION", "COLE_CODIGO_ICFES", 
+"COLE_COD_DANE_ESTABLECIMIENTO", "COLE_NOMBRE_ESTABLECIMIENTO", "COLE_GENERO", 
+"COLE_CALENDARIO", "COLE_CARACTER", "COLE_COD_DANE_SEDE", "COLE_NOMBRE_SEDE", 
+"COLE_SEDE_PRINCIPAL", "COLE_JORNADA", "PUNT_LECTURA_CRITICA", 
+"PERCENTIL_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PERCENTIL_MATEMATICAS", 
+"PUNT_C_NATURALES", "PERCENTIL_C_NATURALES", "PUNT_SOCIALES_CIUDADANAS", 
+"PERCENTIL_SOCIALES_CIUDADANAS", "PUNT_INGLES", "PERCENTIL_INGLES", "PERCENTIL_ESPECIAL_GLOBAL"
+)
+
+data <- data[, !names(data) %in% columnas_irrelevantes]
+```
+
+------------------------------------------------------------------------
+
+Después de la limpieza de datos, volvemos a comprobar el número de filas
+y columnas, como se muestra en el siguiente código.
+
+```{r size_clean_data}
+# Contar la cantidad de registros y columnas
+dim(data)
+```
+
+------------------------------------------------------------------------
+
+#### Missing values
+
+Además, al buscar correlaciones entre variables socioeducativas y
+rendimiento académico, detectamos que algunos campos contenían valores
+'NA' o vacíos.
+
+Probamos eliminar 'NA' de manera general, pero resultó en la pérdida
+significativa de datos, reduciendo el conjunto de más de 500K a poco más
+de 7K registros, lo cual es poco representativo.
+
+Decidimos, por ende, abordar esta limpieza de 'NA' de manera más
+específica, es decir, eliminando los 'NA' solo de las columnas que
+intervengan en resolución de una pregunta en particular. Por ejemplo, si
+se analiza la correlación entre el puntaje obtenido y el nivel
+socioeconómico del estudiante, solo se eliminan los 'NA' de estas dos
+columnas para responder a la pregunta.
+
+Esto nos permitió conservar un tamaño de muestra más representativo y
+relevante para nuestros análisis sin sacrificar información crucial.
+Esta metodología se alinea con el objetivo de garantizar que los datos
+sean lo más precisos y completos posible para abordar las interrogantes
+planteadas sin comprometer la integridad del análisis.
+
+```{r missing_values}
+# Contar la cantidad de NA
+sum(is.na(data))
+```
+
+### Previsualización de datos
+
+#### Vista previa del conjunto de datos limpio
+
+En los datos, cada fila es un estudiante y las columnas son la
+información socioeconómica, demográfica, académica,  y familiar de la
+prueba sobre el estudiante.
+
+```{r prev_data}
+library(DT)
+datatable(head(data[, 1:10],50))
+```
+
+### Descripción de datos
+
+```{r data_desc}
+Variable.type <- lapply(data,class)
+Variable.desc <- c(
+    "Género",
+    "¿Pertenece usted a un grupo étnico minoritario?",
+    "Departamento de residencia",
+    "Código Dane del departamento de residencia",
+    "Municipio de Residencia",
+    "Código Dane del municipio de residencia",
+    "Nivel educativo más alto alcanzado por el padre",
+    "Nivel educativo más alto alcanzado por la madre",
+    "Estrato socioeconómico de la vivienda según recibo de energía eléctrica",
+    "¿Su hogar cuenta con servicio o conexión a internet?",
+    "¿Cuáles de los siguientes bienes posee su hogar?: Computador",
+    "¿Cuáles de los siguientes bienes posee su hogar?: Máquina lavadora de ropa",
+    "¿Cuáles de los siguientes bienes posee su hogar?: Horno Microondas u Horno eléctrico o a gas",
+    "¿Su hogar cuenta con servicio cerrado de televisión?",
+    "¿Cuáles de los siguientes bienes posee su hogar?: Automóvil particular",
+    "¿Cuáles de los siguientes bienes posee su hogar?: Motocicleta",
+    "¿Cuáles de los siguientes bienes posee su hogar?: Consola para juegos electrónicos (PlayStation, Xbox, Nintendo, etc.)",
+    "¿Cuántos libros físicos o electrónicos hay en su hogar excluyendo periódicos, revistas, directorios telefónicos y libros del colegio?",
+    "Usualmente, ¿cuánto tiempo al día dedica a leer por entretenimiento?",
+    "Usualmente, ¿cuánto tiempo al día dedica a navegar en internet? Excluya actividades académicas",
+    "¿Cuántas horas trabajó usted durante la semana pasada?",
+    "¿Usted recibe algún tipo de remuneración por trabajar?",
+    "Con respecto al año inmediatamente anterior, la situación económica de su hogar es:",
+    "Indica la naturaleza del Establecimiento (Privado o público)",
+    "Indica si el Establecimiento es bilingüe o no",
+    "Área de ubicación de la Sede (rural o urbano)",
+    "Código Dane del municipio donde está ubicada la Sede",
+    "Nombre del municipio donde está ubicada la Sede",
+    "Código Dane del departamento de la Sede",
+    "Nombre del departamento donde está ubicada la Sede",
+    "Desempeño matemáticas",
+    "Desempeño en inglés",
+    "Desempeño ciencias naturales",
+    "Desempeño en lectura crítica",
+    "Desempeño sociales y ciudadanas",
+    "Puntaje total obtenido",
+    "Percentil global en que se encuentra el evaluado",
+    "Nivel Socioeconómico del evaluado",
+    "Nivel Socioeconómico del Establecimiento"
+)
+data.desc <- as.data.frame(cbind(Data.Type = unlist(Variable.type), 
+                                 Variable.Description = Variable.desc))
+colnames(data.desc) <- c("Data Type","Variable Description")
+library(knitr)
+kable(data.desc)
+```
+
+## Análisis exploratorio
+
+### Correlación entre el conexto socioeconómico y el desempeño académico: 
+
+* ¿Existe una correlación entre el desempeño académico y el nivel socioeconómico del estudiante?
+
+Para ello, lo primero que debemos hacer es crear un dataframe con las dos variables a analizar en este caso: "ESTU_NSE_INDIVIDUAL" y "PUNT_GLOBAL":
+
+```{r c_des_nse, eval= FALSE}
+
+
+```
+ Seguido de esto procedemos a realizar un histograma entre las dos variables, para analizar tendencias a partir del mismo: 
+ 
+```{r c_des_nse_2, eval= FALSE}
+
+```
+
+Del cual podemos concluir que
+
+* ¿El tipo de colegio (público/privado, urbano/rural, bilingüe) se correlaciona con el desempeño académico? ¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
+
+
+
+
