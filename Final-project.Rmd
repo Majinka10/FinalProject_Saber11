@@ -7,10 +7,12 @@ output:
 editor_options: 
   markdown: 
     wrap: 72
+encoding: UTF-8
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 # Data analysis {.tabset}
@@ -49,6 +51,7 @@ Para reproducir el código y los resultados a lo largo de este proyecto, fue nec
 ``` {r packages, eval= FALSE}
 library(knitr)
 library(DT)
+library(ggplot2)
 
 ```
 
@@ -269,19 +272,144 @@ kable(data.desc)
 
 Para ello, lo primero que debemos hacer es crear un dataframe con las dos variables a analizar en este caso: "ESTU_NSE_INDIVIDUAL" y "PUNT_GLOBAL":
 
-```{r c_des_nse, eval= FALSE}
+```{r c_des_nse}
 
+nuevo_df <- data[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las dos columnas de interés
+
+sum(is.na(nuevo_df)) # Contar la cantidad de NA
+
+nuevo_df <- nuevo_df[complete.cases(nuevo_df), ] # Quitar los NA del nuevo dataframe
+
+sum(is.na(nuevo_df)) # Contar la cantidad de NA
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL)
 
 ```
  Seguido de esto procedemos a realizar un histograma entre las dos variables, para analizar tendencias a partir del mismo: 
  
-```{r c_des_nse_2, eval= FALSE}
+```{r c_des_nse_2, eval=FALSE}
+library(ggplot2)
 
+# Gráfico de dispersión
+plot(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL,
+     xlab = "Nivel Socioeconómico Individual",
+     ylab = "Puntaje Global",
+     main = "Gráfico de dispersión")
+
+# Gráfico de regresión
+plot(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL,
+     xlab = "Nivel Socioeconómico Individual",
+     ylab = "Puntaje Global",
+     main = "Gráfico de regresión")
+abline(lm(PUNT_GLOBAL ~ ESTU_NSE_INDIVIDUAL, data = nuevo_df), col = "red")
+
+
+# Gráfico de densidad conjunta
+ggplot2::ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
+    geom_density_2d() +
+    labs(x = "Nivel Socioeconómico Individual", y = "Puntaje Global") +
+    ggtitle("Gráfico de Densidad Conjunta")
+
+
+ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
+    geom_jitter()
+
+
+ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
+    geom_point() +
+    stat_smooth()
 ```
 
 Del cual podemos concluir que
 
 * ¿El tipo de colegio (público/privado, urbano/rural, bilingüe) se correlaciona con el desempeño académico? ¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
+
+```{r c_des_tc_1}
+
+nuevo_df <- data[, c("COLE_NATURALEZA", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las columnas de interés
+
+nuevo_df_limpiado_1 <- nuevo_df[complete.cases(nuevo_df) & apply(nuevo_df, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
+
+sum(is.na(nuevo_df)) # Contar la cantidad de NA
+
+library(ggplot2)
+
+# Crear un gráfico de caja para visualizar la relación
+ggplot(nuevo_df_limpiado_1, aes(x = nuevo_df_limpiado_1$COLE_NATURALEZA, y = nuevo_df_limpiado_1$PUNT_GLOBAL)) +
+  geom_boxplot() +
+  labs(x = "Naturaleza del Colegio", y = "Puntaje Global") +
+  ggtitle("Distribución del Puntaje Global por Naturaleza del Colegio")
+```
+
+```{r c_des_tc_2}
+
+nuevo_df_2 <- data[, c("COLE_BILINGUE", "DESEMP_INGLES")]
+
+nuevo_df_limpiado_2 <- nuevo_df_2[complete.cases(nuevo_df_2) & apply(nuevo_df_2, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
+
+sum(is.na(nuevo_df_2)) # Contar la cantidad de NA
+
+library(ggplot2)
+# Crear una tabla de contingencia
+tabla_contingencia <- table(nuevo_df_limpiado_2$COLE_BILINGUE, nuevo_df_limpiado_2$DESEMP_INGLES)
+
+# Crear el gráfico de barras apiladas
+barplot(tabla_contingencia, beside = TRUE, legend.text = rownames(tabla_contingencia),
+        col = c("lightblue", "lightgreen"),
+        main = "Gráfico de Barras Apiladas")
+
+
+summary(nuevo_df_limpiado_2)
+```
+
+* ¿Hay alguna relación entre el tiempo dedicado a leer y sus puntajes? 
+
+```{r c_des_dlec_1}
+
+nuevo_df_4 <- data[, c("ESTU_DEDICACIONLECTURADIARIA", "PUNT_GLOBAL")] # Crear un nuevo dataframe las columnas de interés
+
+nuevo_df_limpiado_4 <- nuevo_df_4[complete.cases(nuevo_df_4) & apply(nuevo_df_4, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
+
+sum(is.na(nuevo_df_4)) # Contar la cantidad de N
+
+library(ggplot2)
+
+# Crear un gráfico de caja para ESTU_DEDICACIONLECTURADIARIA
+ggplot(nuevo_df_limpiado_4, aes(x = nuevo_df_limpiado_4$ESTU_DEDICACIONLECTURADIARIA, y = nuevo_df_limpiado_4$PUNT_GLOBAL)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Relación entre tiempo dedicado a la lectura  y Puntaje Global",
+       x = "Tiempo de lectura",
+       y = "Puntaje Global")
+
+```
+
+* ¿Los hijos de padres con niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
+
+```{r c_des_ne_1}
+
+nuevo_df_3 <- data[, c("FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las tres columnas de interés
+
+nuevo_df_limpiado_3 <- nuevo_df_3[complete.cases(nuevo_df_3) & apply(nuevo_df_3, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
+
+sum(is.na(nuevo_df_3)) # Contar la cantidad de NA
+
+library(ggplot2)
+
+# Crear un gráfico de caja para FAMI_EDUCACIONPADRE
+ggplot(nuevo_df_limpiado_3, aes(x = nuevo_df_limpiado_3$FAMI_EDUCACIONPADRE, y = nuevo_df_limpiado_3$PUNT_GLOBAL)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Relación entre Educación del Padre y Puntaje Global",
+       x = "Educación del Padre",
+       y = "Puntaje Global")
+
+# Crear un gráfico de caja para FAMI_EDUCACIONMADRE
+ggplot(nuevo_df_limpiado_3, aes(x = nuevo_df_limpiado_3$FAMI_EDUCACIONMADRE, y = nuevo_df_limpiado_3$PUNT_GLOBAL)) +
+  geom_boxplot(fill = "lightgreen", color = "black") +
+  labs(title = "Relación entre Educación de la Madre y Puntaje Global",
+       x = "Educación de la Madre",
+       y = "Puntaje Global")
+```
 
 
 
