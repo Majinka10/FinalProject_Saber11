@@ -145,7 +145,7 @@ columnas_relevantes <- c(
     "ESTU_DEDICACIONLECTURADIARIA", "FAMI_TIENECOMPUTADOR", "FAMI_TIENEINTERNET",
     "ESTU_DEDICACIONINTERNET", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS",
     "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS", "DESEMP_INGLES",
-    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO"
+    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO", "PUNT_INGLES"
 )
 
 data <- data[, columnas_relevantes, drop = FALSE]
@@ -261,6 +261,84 @@ kable(data.desc)
 
 
 ## Análisis exploratorio {.tabset .tabset-fade}
+### Matriz de correlación
+
+Este código realiza la conversión de variables categóricas (factores) a numéricas, simplificando las etiquetas para mejorar la legibilidad y permitir el análisis estadístico.
+
+Primero, identifico los niveles de las variables categóricas a convertir, mostrándolos para su inspección. Luego, reordeno estos niveles para asignarles un orden lógico, donde los valores inferiores tienen asignados números menores. Por ejemplo, en la variable de estrato socioeconómico, se asigna el número 1 al estrato más bajo y así sucesivamente. Esto se hace para variables como dedicación diaria a la lectura, horas de trabajo, nivel educativo de los padres, número de libros en el hogar y tiempo de dedicación a internet.
+
+```{r factor_to_numeric}
+# Conversión de variables factoriales a numéricas
+
+## Primero se ven los niveles que tiene la variable
+levels(data$FAMI_ESTRATOVIVIENDA)
+
+## Luego se ordenan los niveles de menor a mayor
+data$FAMI_ESTRATOVIVIENDA <- factor(data$FAMI_ESTRATOVIVIENDA, levels = c("Sin Estrato", "Estrato 1", "Estrato 2", "Estrato 3", "Estrato 4", "Estrato 5", "Estrato 6"))
+
+## Se verifica
+levels(data$FAMI_ESTRATOVIVIENDA)
+
+## Se convierte a numero, donde 1 es el nivel inferior, así sucesivamente
+data$FAMI_ESTRATOVIVIENDA <- as.numeric(data$FAMI_ESTRATOVIVIENDA)
+
+### Para tiempo de lectura diaria por entretenimiento
+#levels(data$ESTU_DEDICACIONLECTURADIARIA)
+data$ESTU_DEDICACIONLECTURADIARIA <- factor(data$ESTU_DEDICACIONLECTURADIARIA, levels = c("No leo por entretenimiento", "30 minutos o menos", "Entre 1 y 2 horas", "Entre 30 y 60 minutos", "Más de 2 horas"))
+#levels(data$ESTU_DEDICACIONLECTURADIARIA)
+data$ESTU_DEDICACIONLECTURADIARIA <- as.numeric(data$ESTU_DEDICACIONLECTURADIARIA)
+
+### Para horas que trabaja
+#levels(data$ESTU_HORASSEMANATRABAJA)
+data$ESTU_HORASSEMANATRABAJA <- factor(data$ESTU_HORASSEMANATRABAJA, levels = c("0", "Menos de 10 horas", "Entre 11 y 20 horas", "Entre 21 y 30 horas", "Más de 30 horas"))
+#levels(data$ESTU_HORASSEMANATRABAJA)
+data$ESTU_HORASSEMANATRABAJA <- as.numeric(data$ESTU_HORASSEMANATRABAJA)
+
+### Para educacion madre
+#levels(data$FAMI_EDUCACIONMADRE)
+data$FAMI_EDUCACIONMADRE <- factor(data$FAMI_EDUCACIONMADRE, levels = c("Ninguno", "Primaria incompleta", "Primaria completa", "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa", "Técnica o tecnológica incompleta", "Técnica o tecnológica completa", "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
+#levels(data$FAMI_EDUCACIONMADRE)
+data$FAMI_EDUCACIONMADRE <- as.numeric(data$FAMI_EDUCACIONMADRE)
+
+### Para educacion padre
+#levels(data$FAMI_EDUCACIONPADRE)
+data$FAMI_EDUCACIONPADRE <- factor(data$FAMI_EDUCACIONPADRE, levels = c("Ninguno", "Primaria incompleta", "Primaria completa", "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa", "Técnica o tecnológica incompleta", "Técnica o tecnológica completa", "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
+#levels(data$FAMI_EDUCACIONPADRE)
+data$FAMI_EDUCACIONPADRE <- as.numeric(data$FAMI_EDUCACIONPADRE)
+
+### Para numero de libros
+#levels(data$FAMI_NUMLIBROS)
+data$FAMI_NUMLIBROS <- factor(data$FAMI_NUMLIBROS, levels = c("0 A 10 LIBROS", "11 A 25 LIBROS", "26 A 100 LIBROS", "MÁS DE 100 LIBROS"))
+#levels(data$FAMI_NUMLIBROS)
+data$FAMI_NUMLIBROS <- as.numeric(data$FAMI_NUMLIBROS)
+
+### Para tiempo de dedicacion internet
+#levels(data$ESTU_DEDICACIONINTERNET)
+data$ESTU_DEDICACIONINTERNET <- factor(data$ESTU_DEDICACIONINTERNET, levels = c("No Navega Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
+#levels(data$ESTU_DEDICACIONINTERNET)
+data$ESTU_DEDICACIONINTERNET <- as.numeric(data$ESTU_DEDICACIONINTERNET)
+```
+
+Después de la conversión, creé un nuevo dataframe que incluye estas variables numéricas junto con otras variables relevantes como puntajes globales, desempeño en inglés, lectura crítica, matemáticas, ciencias y sociales. Además, se verifico y corrijo la presencia de valores perdidos (NA) en el nuevo dataframe, eliminándolos para garantizar una análisis robusto.
+
+```{r cor_matrix}
+matrix_df <- data[, c("FAMI_ESTRATOVIVIENDA", "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA", "FAMI_EDUCACIONMADRE", "FAMI_EDUCACIONPADRE", "FAMI_NUMLIBROS", "ESTU_DEDICACIONINTERNET", "PUNT_GLOBAL", "PUNT_INGLES", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS", "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS")]
+
+sum(is.na(matrix_df)) # Contar los NA
+
+matrix_df <- matrix_df[complete.cases(matrix_df), ] # Quitar los NA del nuevo dataframe
+
+# Cambiar los nombres de las columnas para una matrix más legible
+colnames(matrix_df) <- c("estrato", "lectura_diaria", "horas_trabajo", "educacion_madre", "educacion_padre", "num_libros", "dedicacion_internet", "punt_global", "punt_ingles", "desempenio_lectura", "desempenio_mate", "desempenio_ciencias", "desempenio_sociales")
+
+correlation_matrix <- cor(matrix_df)
+
+# Generar el gráfico sin valores de correlación
+corrplot::corrplot(correlation_matrix, type = "lower", tl.cex=0.7)
+```
+
+
+
 ### Socioeconómico {.tabset}
 #### Correlación entre el nivel socioeconómico y el desempeño académico: 
 
@@ -417,7 +495,7 @@ si sale negativa, correlacion inversa entre los que no tienen pc y les va peor
 #### Tiene computador y puntaje
 ```{r cor_tienepc_punt}
 # Filtrar para tener solo estudiantes con y sin computadora
-data_valid <- data_limpia[data_limpia$FAMI_TIENECOMPUTADOR %in% c("Si", "No"), ]
+data_valid <- data[data$FAMI_TIENECOMPUTADOR %in% c("Si", "No"), ]
 
 # Calcular la media de los puntajes para cada grupo
 media_puntajes <- tapply(data_valid$PUNT_GLOBAL, data_valid$FAMI_TIENECOMPUTADOR, mean)
@@ -435,6 +513,5 @@ barplot(media_puntajes,
 ### Demografico
 Eaerasdasasddeasdas
 ```{r nombre}
-
 
 ```
