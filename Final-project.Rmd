@@ -148,11 +148,7 @@ columnas_relevantes <- c(
     "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO"
 )
 
-data_limpia <- data[, columnas_relevantes, drop = FALSE]
-sum(is.na(data_limpia))
-nuevo_df <- data_limpia[complete.cases(data_limpia), ] # Quitar los NA del nuevo dataframe
-
-#matriz_cor <- cor(nuevo_df)
+data <- data[, columnas_relevantes, drop = FALSE]
 ```
 
 ___
@@ -192,6 +188,10 @@ planteadas sin comprometer la integridad del análisis.
 
 ```{r missing_values}
 # Contar la cantidad de NA
+sum(is.na(data))
+
+data <- data[complete.cases(data), ] # Quitar los NA del nuevo dataframe
+
 sum(is.na(data))
 ```
 
