@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-# Data analysis {.tabset}
+# Pruebas Icfes Saber 11 del segundo semestre del año 2022 {.tabset}
 
 ## Introducción
 
@@ -41,19 +41,21 @@ ingresos familiares, etc.
 
 * Familiar: estructura familiar, apoyo parental, etc.
 
+
 ## Paquetes requeridos 
 
 Para reproducir el código y los resultados a lo largo de este proyecto, fue necesario cargar los siguientes paquetes.
 
 - **knitr:** Se utiliza para mostrar una tabla alineada en la pantalla.
 - **DT**: Útil para mostrar datos tabulares de una manera interactiva y configurable, facilitando la exploración y el análisis de los datos.
+- **ggplot2**: Potente para visualizaciones, permite crear una amplia gama de gráficos personalizados y de alta calidad.
 
 ``` {r packages, eval= FALSE}
 library(knitr)
 library(DT)
-library(ggplot2)
-
+library(ggplot2) # visualizing data
 ```
+
 
 
 ## Preparación de datos {.tabset .tabset-fade}
@@ -106,7 +108,7 @@ con éxito en R usando read.csv, facilitando nuestro análisis.
 
 ```{r import_data}
 ruta_datos <- "SB11_20222.csv"
-data <- read.csv(ruta_datos, sep = ",", dec = ".", header = TRUE, stringsAsFactors = FALSE)
+data <- read.csv(ruta_datos, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE)
 
 # Verificar la clase del objeto
 class(data)
@@ -127,39 +129,33 @@ nuestro análisis, eliminándolas para focalizarnos en datos pertinentes.
 
 Las columnas eliminadas abarcaban detalles específicos y contextuales
 poco relevantes para nuestro análisis. Incluían información sobre la
-estructura familiar, ocupación de los padres, alimentación y cantidad de
-habitaciones en el hogar, así como datos relacionados con el tipo de
-documento, nacionalidad, período de presentación del examen, entre
-otros.
+estructura familiar, ocupación de los padres, alimentación y cantidad de habitaciones en el hogar, así como datos relacionados con el tipo de documento, nacionalidad, género, período de presentación del examen, entre otros.
 
 Estos detalles, aunque podrían ser importantes en otros contextos, no
 aportaban directamente a nuestras investigaciones sobre la correlación
-entre variables socioeducativas y el rendimiento académico. Su exclusión
-nos permitió concentrarnos en datos más pertinentes y directamente
-vinculados a nuestras áreas de estudio, optimizando así la calidad y
-relevancia de nuestro análisis.
+entre variables socioeducativas, demográficas y el rendimiento académico. 
+Su exclusión nos permitió concentrarnos en datos más pertinentes y directamente vinculados a nuestras áreas de estudio, optimizando así la calidad y relevancia de nuestro análisis.
 
 ```{r clean_data}
-columnas_irrelevantes <- c(
-"FAMI_PERSONASHOGAR", "FAMI_CUARTOSHOGAR", "FAMI_TRABAJOLABORPADRE", 
-"FAMI_TRABAJOLABORMADRE", "FAMI_COMELECHEDERIVADOS", "FAMI_COMECARNEPESCADOHUEVO", 
-"FAMI_COMECEREALFRUTOSLEGUMBRE", "ESTU_TIPODOCUMENTO", "ESTU_NACIONALIDAD", 
-"ESTU_FECHANACIMIENTO", "PERIODO", "ESTU_CONSECUTIVO", "ESTU_ESTUDIANTE", 
-"ESTU_PAIS_RESIDE", "ESTU_PRIVADO_LIBERTAD", "ESTU_COD_MCPIO_PRESENTACION", 
-"ESTU_MCPIO_PRESENTACION", "ESTU_DEPTO_PRESENTACION", "ESTU_COD_DEPTO_PRESENTACION", 
-"ESTU_INSE_INDIVIDUAL", "ESTU_ESTADOINVESTIGACION", "COLE_CODIGO_ICFES", 
-"COLE_COD_DANE_ESTABLECIMIENTO", "COLE_NOMBRE_ESTABLECIMIENTO", "COLE_GENERO", 
-"COLE_CALENDARIO", "COLE_CARACTER", "COLE_COD_DANE_SEDE", "COLE_NOMBRE_SEDE", 
-"COLE_SEDE_PRINCIPAL", "COLE_JORNADA", "PUNT_LECTURA_CRITICA", 
-"PERCENTIL_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PERCENTIL_MATEMATICAS", 
-"PUNT_C_NATURALES", "PERCENTIL_C_NATURALES", "PUNT_SOCIALES_CIUDADANAS", 
-"PERCENTIL_SOCIALES_CIUDADANAS", "PUNT_INGLES", "PERCENTIL_INGLES", "PERCENTIL_ESPECIAL_GLOBAL"
+columnas_relevantes <- c(
+    "ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL", "FAMI_TIENECOMPUTADOR",
+    "FAMI_ESTRATOVIVIENDA", "COLE_NATURALEZA", "COLE_BILINGUE",
+    "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA",
+    "FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", "FAMI_NUMLIBROS",
+    "ESTU_DEDICACIONLECTURADIARIA", "FAMI_TIENECOMPUTADOR", "FAMI_TIENEINTERNET",
+    "ESTU_DEDICACIONINTERNET", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS",
+    "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS", "DESEMP_INGLES",
+    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO"
 )
 
-data <- data[, !names(data) %in% columnas_irrelevantes]
+data_limpia <- data[, columnas_relevantes, drop = FALSE]
+sum(is.na(data_limpia))
+nuevo_df <- data_limpia[complete.cases(data_limpia), ] # Quitar los NA del nuevo dataframe
+
+#matriz_cor <- cor(nuevo_df)
 ```
 
-------------------------------------------------------------------------
+___
 
 Después de la limpieza de datos, volvemos a comprobar el número de filas
 y columnas, como se muestra en el siguiente código.
@@ -169,7 +165,7 @@ y columnas, como se muestra en el siguiente código.
 dim(data)
 ```
 
-------------------------------------------------------------------------
+___
 
 #### Missing values
 
@@ -217,7 +213,6 @@ datatable(head(data[, 1:10],50))
 ```{r data_desc}
 Variable.type <- lapply(data,class)
 Variable.desc <- c(
-    "Género",
     "¿Pertenece usted a un grupo étnico minoritario?",
     "Departamento de residencia",
     "Código Dane del departamento de residencia",
@@ -264,15 +259,17 @@ library(knitr)
 kable(data.desc)
 ```
 
-## Análisis exploratorio
 
-### Correlación entre el conexto socioeconómico y el desempeño académico: 
+## Análisis exploratorio {.tabset .tabset-fade}
+### Socioeconómico {.tabset}
+#### Correlación entre el nivel socioeconómico y el desempeño académico: 
 
-* ¿Existe una correlación entre el desempeño académico y el nivel socioeconómico del estudiante?
+Analizamos si existe una correlación entre el desempeño académico y el nivel socioeconómico del estudiante.
 
 Para ello, lo primero que debemos hacer es crear un dataframe con las dos variables a analizar en este caso: "ESTU_NSE_INDIVIDUAL" y "PUNT_GLOBAL":
 
 ```{r c_des_nse}
+library(ggplot2)
 
 nuevo_df <- data[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las dos columnas de interés
 
@@ -283,35 +280,27 @@ nuevo_df <- nuevo_df[complete.cases(nuevo_df), ] # Quitar los NA del nuevo dataf
 sum(is.na(nuevo_df)) # Contar la cantidad de NA
 
 # Calcular matriz de correlación
-correlation_matrix <- cor(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL)
+correlation_matrix <- cor(nuevo_df[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")])
+
+# Visualizar la matriz de correlación
+corrplot::corrplot(correlation_matrix, method = "color")
 
 ```
  Seguido de esto procedemos a realizar un histograma entre las dos variables, para analizar tendencias a partir del mismo: 
  
-```{r c_des_nse_2, eval=FALSE}
-library(ggplot2)
+distribucion de las 4 clases
+graficos de lineas para ver las 4 clases
+distribucion para ver que tan probable saque un puntaje
+dependiendo de los factores socioeconomicos tienen tendencia a estar en cierto rango de puntajes
+con la correlacion, se verifica la relacion entre los factores y el puntaje
+para ver la probabilidad, hacer la distribucion de probabilidad
 
-# Gráfico de dispersión
-plot(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL,
-     xlab = "Nivel Socioeconómico Individual",
-     ylab = "Puntaje Global",
-     main = "Gráfico de dispersión")
+graficas de caja para ver los valores atipicos y donde en que puntajes se concentran los datos
+hacer una grafica con las 4 distribuciones de gauss y un abline con la media de cada una para ver la linea de tendencia
 
-# Gráfico de regresión
-plot(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL,
-     xlab = "Nivel Socioeconómico Individual",
-     ylab = "Puntaje Global",
-     main = "Gráfico de regresión")
-abline(lm(PUNT_GLOBAL ~ ESTU_NSE_INDIVIDUAL, data = nuevo_df), col = "red")
-
-
-# Gráfico de densidad conjunta
-ggplot2::ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
-    geom_density_2d() +
-    labs(x = "Nivel Socioeconómico Individual", y = "Puntaje Global") +
-    ggtitle("Gráfico de Densidad Conjunta")
-
-
+para valor discreto -> caja y bigote
+ 
+```{r c_des_nse_2}
 ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
     geom_jitter()
 
@@ -323,7 +312,11 @@ ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)
 
 Del cual podemos concluir que
 
-* ¿El tipo de colegio (público/privado, urbano/rural, bilingüe) se correlaciona con el desempeño académico? ¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
+#### Correlacion entre el tipo de colegio y el desempeño académico
+
+Analizamos si el tipo de colegio (público/privado, urbano/rural, bilingüe) se correlaciona con el desempeño académico 
+
+¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
 
 ```{r c_des_tc_1}
 
@@ -332,8 +325,6 @@ nuevo_df <- data[, c("COLE_NATURALEZA", "PUNT_GLOBAL")] # Crear un nuevo datafra
 nuevo_df_limpiado_1 <- nuevo_df[complete.cases(nuevo_df) & apply(nuevo_df, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
 
 sum(is.na(nuevo_df)) # Contar la cantidad de NA
-
-library(ggplot2)
 
 # Crear un gráfico de caja para visualizar la relación
 ggplot(nuevo_df_limpiado_1, aes(x = nuevo_df_limpiado_1$COLE_NATURALEZA, y = nuevo_df_limpiado_1$PUNT_GLOBAL)) +
@@ -350,7 +341,6 @@ nuevo_df_limpiado_2 <- nuevo_df_2[complete.cases(nuevo_df_2) & apply(nuevo_df_2,
 
 sum(is.na(nuevo_df_2)) # Contar la cantidad de NA
 
-library(ggplot2)
 # Crear una tabla de contingencia
 tabla_contingencia <- table(nuevo_df_limpiado_2$COLE_BILINGUE, nuevo_df_limpiado_2$DESEMP_INGLES)
 
@@ -363,7 +353,9 @@ barplot(tabla_contingencia, beside = TRUE, legend.text = rownames(tabla_continge
 summary(nuevo_df_limpiado_2)
 ```
 
-* ¿Hay alguna relación entre el tiempo dedicado a leer y sus puntajes? 
+#### Correlacion entre el tiempo dedicado a leer y el desempeño
+
+¿Hay alguna relación entre el tiempo dedicado a leer y sus puntajes? 
 
 ```{r c_des_dlec_1}
 
@@ -372,8 +364,6 @@ nuevo_df_4 <- data[, c("ESTU_DEDICACIONLECTURADIARIA", "PUNT_GLOBAL")] # Crear u
 nuevo_df_limpiado_4 <- nuevo_df_4[complete.cases(nuevo_df_4) & apply(nuevo_df_4, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
 
 sum(is.na(nuevo_df_4)) # Contar la cantidad de N
-
-library(ggplot2)
 
 # Crear un gráfico de caja para ESTU_DEDICACIONLECTURADIARIA
 ggplot(nuevo_df_limpiado_4, aes(x = nuevo_df_limpiado_4$ESTU_DEDICACIONLECTURADIARIA, y = nuevo_df_limpiado_4$PUNT_GLOBAL)) +
@@ -384,7 +374,9 @@ ggplot(nuevo_df_limpiado_4, aes(x = nuevo_df_limpiado_4$ESTU_DEDICACIONLECTURADI
 
 ```
 
-* ¿Los hijos de padres con niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
+#### Correlacion entre el nivel educativo de los padres y puntaje
+
+¿Los hijos de padres con niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
 
 ```{r c_des_ne_1}
 
@@ -393,8 +385,6 @@ nuevo_df_3 <- data[, c("FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", "PUNT_GLOBA
 nuevo_df_limpiado_3 <- nuevo_df_3[complete.cases(nuevo_df_3) & apply(nuevo_df_3, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
 
 sum(is.na(nuevo_df_3)) # Contar la cantidad de NA
-
-library(ggplot2)
 
 # Crear un gráfico de caja para FAMI_EDUCACIONPADRE
 ggplot(nuevo_df_limpiado_3, aes(x = nuevo_df_limpiado_3$FAMI_EDUCACIONPADRE, y = nuevo_df_limpiado_3$PUNT_GLOBAL)) +
@@ -414,3 +404,37 @@ ggplot(nuevo_df_limpiado_3, aes(x = nuevo_df_limpiado_3$FAMI_EDUCACIONMADRE, y =
 
 
 
+
+
+### Acceso a recursos
+cojo los que no tienen computador, saco los puntajes y una grafica de los puntajes
+cojo los que tienen y saco los puntajes y hago la grafica como lineas.
+en una sola grafica muestro ambas lineas
+muestro la correlacion y si sale alta puedo sacar la conclusion
+alta o baja
+si es positiva o cercana a 1, alta correlacion entre los que no tienen y los que si
+si sale negativa, correlacion inversa entre los que no tienen pc y les va peor
+#### Tiene computador y puntaje
+```{r cor_tienepc_punt}
+# Filtrar para tener solo estudiantes con y sin computadora
+data_valid <- data_limpia[data_limpia$FAMI_TIENECOMPUTADOR %in% c("Si", "No"), ]
+
+# Calcular la media de los puntajes para cada grupo
+media_puntajes <- tapply(data_valid$PUNT_GLOBAL, data_valid$FAMI_TIENECOMPUTADOR, mean)
+
+# Realizar análisis descriptivo
+summary(data_valid$PUNT_GLOBAL)
+
+# Visualizar las diferencias en puntajes medios
+barplot(media_puntajes, 
+        main = "Puntaje Medio por tener o no tener Computadora",
+        xlab = "Tiene Computadora",
+        ylab = "Puntaje Medio")
+```
+
+### Demografico
+Eaerasdasasddeasdas
+```{r nombre}
+
+
+```

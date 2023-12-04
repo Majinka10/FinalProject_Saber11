@@ -54,7 +54,7 @@ dim(data)
 #install.packages("DT")
 library(DT)
 # Muestra las primeras 50 filas con solo 10 columnas
-datatable(head(datos_limpios[, 1:10],50))
+datatable(head(data[, 1:10],50))
 ```
 
 ### Diccionario de datos 
@@ -115,6 +115,18 @@ kable(data.desc)
 ### Socioeconomico
 #### Correlación entre el desempeño académico y el nivel socioeconómico del estudiante
 
+distribucion de las 4 clases
+graficos de lineas para ver las 4 clases
+distribucion para ver que tan probable saque un puntaje
+dependiendo de los factores socioeconomicos tienen tendencia a estar en cierto rango de puntajes
+con la correlacion, se verifica la relacion entre los factores y el puntaje
+para ver la probabilidad, hacer la distribucion de probabilidad
+
+graficas de caja para ver los valores atipicos y donde en que puntajes se concentran los datos
+hacer una grafica con las 4 distribuciones de gauss y un abline con la media de cada una para ver la linea de tendencia
+
+para valor discreto -> caja y bigote
+
 ```{r cor_nse_punt}
 nuevo_df <- data[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las dos columnas de interés
 
@@ -125,7 +137,10 @@ nuevo_df <- nuevo_df[complete.cases(nuevo_df), ] # Quitar los NA del nuevo dataf
 sum(is.na(nuevo_df)) # Contar la cantidad de NA
 
 # Calcular matriz de correlación
-correlation_matrix <- cor(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL)
+correlation_matrix <- cor(nuevo_df[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")])
+
+# Visualizar la matriz de correlación
+corrplot::corrplot(correlation_matrix, method = "color")
 
 # Gráfico de dispersión
 plot(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL,
@@ -140,13 +155,17 @@ plot(nuevo_df$ESTU_NSE_INDIVIDUAL, nuevo_df$PUNT_GLOBAL,
      main = "Gráfico de regresión")
 abline(lm(PUNT_GLOBAL ~ ESTU_NSE_INDIVIDUAL, data = nuevo_df), col = "red")
 
+boxplot(nuevo_df$PUNT_GLOBAL, xlab="Puntaje", horizontal = TRUE)
+
+boxplot(nuevo_df$ESTU_NSE_INDIVIDUAL, xlab="NSE", horizontal = TRUE)
+
+library(ggplot2)
 # Gráfico de densidad conjunta
 ggplot2::ggplot(nuevo_df, aes(x = ESTU_NSE_INDIVIDUAL, y = PUNT_GLOBAL)) +
     geom_density_2d() +
     labs(x = "Nivel Socioeconómico Individual", y = "Puntaje Global") +
     ggtitle("Gráfico de Densidad Conjunta")
 
-library(ggplot2)
 
 ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
     geom_jitter()
@@ -155,4 +174,23 @@ ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)
 ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
     geom_point() +
     stat_smooth()
+
+# Crear un gráfico de caja para visualizar la relación
+ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL==4, y = nuevo_df$PUNT_GLOBAL)) +
+  geom_boxplot() +
+  labs(x = "Nuvel socioeconomico", y = "Puntaje Global") +
+  ggtitle("Distribución")
+
+```
+
+cojo los que no tienen computador, saco los puntajes y una grafica de los puntajes
+cojo los que tienen y saco los puntajes y hago la grafica como lineas.
+en una sola grafica muestro ambas lineas
+muestro la correlacion y si sale alta puedo sacar la conclusion
+alta o baja
+si es positiva o cercana a 1, alta correlacion entre los que no tienen y los que si
+si sale negativa, correlacion inversa entre los que no tienen pc y les va peor
+
+```{r cor_todas}
+hist(data$FAMI_TIENECOMPUTADOR)
 ```
