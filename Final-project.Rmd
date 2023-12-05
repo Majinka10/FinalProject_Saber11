@@ -149,7 +149,7 @@ columnas_relevantes <- c(
     "ESTU_DEDICACIONLECTURADIARIA", "FAMI_TIENECOMPUTADOR", "FAMI_TIENEINTERNET",
     "ESTU_DEDICACIONINTERNET", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS",
     "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS", "DESEMP_INGLES",
-    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO", "PUNT_INGLES"
+    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO", "PUNT_INGLES", "COLE_AREA_UBICACION"
 )
 
 data <- data[, columnas_relevantes, drop = FALSE]
@@ -208,7 +208,6 @@ información socioeconómica, demográfica, académica,  y familiar de la
 prueba sobre el estudiante.
 
 ```{r prev_data}
-library(DT)
 datatable(head(data[, 1:10],50))
 ```
 
@@ -518,11 +517,58 @@ barplot(media_puntajes,
 ```
 
 ### Análisis demografico
-Eaerasdasasddeasdas
-<<<<<<< HEAD
-```{r Promedio de notas en los departamentos de Colombia}
-=======
->>>>>>> 12998151c25925458a790535c5b31ec018fc3196
+Para este análisis, correspondiente a el mapeo de los promedios de puntajes por departamentos y municipios, se lleva a cabo:
+La carga de los mapas corresponientes a departamentos y municipios.
+Separación de datos y cálculo de media del puntaje por departamento o municipio respectivamente.
+arreglo de datos, eliminando casos especiales y cambiando nombres de columnas y tipos de datos.
+JOIN entre el mapa y los puntajes.
+graficación.
+
+```{r Promedio de notas en los departamentos de Colombia y municipios de Santander}
+
+## Cargando el mapa respectivo
+map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
+map2 <- map[,1] # Solo el mapa en terminos de su codigo
+
+## Separando y arreglando los datos de interes de "data"
+
+Puntaje.Depto<-aggregate(PUNT_GLOBAL~ESTU_COD_RESIDE_DEPTO, FUN = mean, data = data)
+
+Puntaje.Depto=Puntaje.Depto[-34,]
+colnames(Puntaje.Depto) <- c('DPTO_CCDGO','PUNTAJE')
+
+map2$DPTO_CCDGO <- as.numeric(map2$DPTO_CCDGO)
+
+## Uniendo tablas
+mapJoin <- left_join(map2, Puntaje.Depto)
+
+## Graficando
+qtm(mapJoin,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+
+#MUNICIPIOS
+
+## Cargando el mapa respectivo
+map <- st_read("MGN2022_MPIO_POLITICO/MGN_MPIO_POLITICO.shp")
+map2 <- map[,1,3] # Solo el mapa en terminos de su codigo
+#plot(map2)
+
+## Separando y arreglando los datos de interes de "data"
+Puntaje.MPIO<-aggregate(PUNT_GLOBAL~ESTU_COD_RESIDE_MCPIO, FUN = mean, data = data)
+
+Puntaje.MPIO=Puntaje.MPIO[-1118,]
+colnames(Puntaje.MPIO) <- c('MPIO_CDPMP','PUNTAJE')
+
+colnames(map2) <- c('MCPIO_CCDGO','geometry')
+Puntaje.MPIO$MPIO_CDPMP <- as.character(Puntaje.MPIO$MPIO_CDPMP)
+
+## Uniendo tablas
+mapJoin <- left_join(map, Puntaje.MPIO)
+
+## Graficando
+tmap_options(check.and.fix = TRUE)
+qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+
+```
 
 ### Correlación entre áreas de conocimiento
 
