@@ -54,6 +54,10 @@ Para reproducir el código y los resultados a lo largo de este proyecto, fue nec
 library(knitr)
 library(DT)
 library(ggplot2) # visualizing data
+library(sf) # trabajar con los tipos de datos geográficos
+library(dplyr) # realizar JOIN
+library(tmap) # graficar mapas
+
 ```
 
 
@@ -512,6 +516,6 @@ barplot(media_puntajes,
 
 ### Demografico
 Eaerasdasasddeasdas
-```{r nombre}
+```{r Promedio de notas en los departamentos de Colombia}
 
 ```
