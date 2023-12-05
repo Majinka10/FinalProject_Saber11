@@ -337,9 +337,12 @@ correlation_matrix <- cor(matrix_df)
 corrplot::corrplot(correlation_matrix, type = "lower", tl.cex=0.7)
 ```
 
+#### Qué se observa
 
+- Se evidencia que la educación de los padres tiende a ser mayor conforme el estrato y que eso mismo se ve reflejados en puntajes un poco más altos de forma global y más específicamente en un mayor puntaje en inglés.
+- Sacar más puntaje en un área específica tiene una correlación directa con sacar más puntaje en las demás áreas y sobre todo en el puntaje global como es obvio.
 
-### Socioeconómico {.tabset}
+### Análisis socioeconómico {.tabset}
 #### Correlación entre el nivel socioeconómico y el desempeño académico: 
 
 Analizamos si existe una correlación entre el desempeño académico y el nivel socioeconómico del estudiante.
@@ -510,8 +513,10 @@ barplot(media_puntajes,
         ylab = "Puntaje Medio")
 ```
 
-### Demografico
+### Análisis demografico
 Eaerasdasasddeasdas
 ```{r nombre}
 
 ```
+
+### Correlación entre áreas de conocimiento
