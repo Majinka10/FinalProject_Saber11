@@ -4,6 +4,7 @@ author: "Guillermo Pinto, Carlos García, Jesús Ramírez"
 date: "2023-12-02"
 output:         
     html_document:      
+        code_folding: show      
 editor_options: 
   markdown: 
     wrap: 72
@@ -54,10 +55,6 @@ Para reproducir el código y los resultados a lo largo de este proyecto, fue nec
 library(knitr)
 library(DT)
 library(ggplot2) # visualizing data
-library(sf) # trabajar con los tipos de datos geográficos
-library(dplyr) # realizar JOIN
-library(tmap) # graficar mapas
-
 ```
 
 
@@ -143,13 +140,15 @@ Su exclusión nos permitió concentrarnos en datos más pertinentes y directamen
 ```{r clean_data}
 columnas_relevantes <- c(
     "ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL", "FAMI_TIENECOMPUTADOR",
-    "FAMI_ESTRATOVIVIENDA", "COLE_NATURALEZA", "COLE_BILINGUE",
+    "FAMI_ESTRATOVIVIENDA", "COLE_NATURALEZA",
     "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA",
     "FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", "FAMI_NUMLIBROS",
     "ESTU_DEDICACIONLECTURADIARIA", "FAMI_TIENECOMPUTADOR", "FAMI_TIENEINTERNET",
     "ESTU_DEDICACIONINTERNET", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS",
     "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS", "DESEMP_INGLES",
-    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO", "PUNT_INGLES", "COLE_AREA_UBICACION"
+    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO", "PUNT_INGLES",
+    "PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES",
+    "PUNT_SOCIALES_CIUDADANAS", "COLE_AREA_UBICACION"
 )
 
 data <- data[, columnas_relevantes, drop = FALSE]
@@ -208,6 +207,7 @@ información socioeconómica, demográfica, académica,  y familiar de la
 prueba sobre el estudiante.
 
 ```{r prev_data}
+library(DT)
 datatable(head(data[, 1:10],50))
 ```
 
@@ -268,7 +268,7 @@ kable(data.desc)
 
 Este código realiza la conversión de variables categóricas (factores) a numéricas, simplificando las etiquetas para mejorar la legibilidad y permitir el análisis estadístico.
 
-Primero, identifico los niveles de las variables categóricas a convertir, mostrándolos para su inspección. Luego, reordeno estos niveles para asignarles un orden lógico, donde los valores inferiores tienen asignados números menores. Por ejemplo, en la variable de estrato socioeconómico, se asigna el número 1 al estrato más bajo y así sucesivamente. Esto se hace para variables como dedicación diaria a la lectura, horas de trabajo, nivel educativo de los padres, número de libros en el hogar y tiempo de dedicación a internet.
+Primero, identifico los niveles de las variables categóricas a convertir, mostrándolos para su inspección. Luego, reordeno estos niveles para asignarles un orden lógico, donde los valores inferiores tienen asignados números menores. Por ejemplo, en la variable de estrato socioeconómico, se asigna el número 1 al estrato más bajo y así sucesivamente. 
 
 ```{r factor_to_numeric}
 # Conversión de variables factoriales a numéricas
@@ -284,7 +284,11 @@ levels(data$FAMI_ESTRATOVIVIENDA)
 
 ## Se convierte a numero, donde 1 es el nivel inferior, así sucesivamente
 data$FAMI_ESTRATOVIVIENDA <- as.numeric(data$FAMI_ESTRATOVIVIENDA)
+```
 
+Esto se hace para variables como dedicación diaria a la lectura, horas de trabajo, nivel educativo de los padres, número de libros en el hogar y tiempo de dedicación a internet.
+
+```{r factor_to_numeric_resto, echo = TRUE, collapse = TRUE}
 ### Para tiempo de lectura diaria por entretenimiento
 #levels(data$ESTU_DEDICACIONLECTURADIARIA)
 data$ESTU_DEDICACIONLECTURADIARIA <- factor(data$ESTU_DEDICACIONLECTURADIARIA, levels = c("No leo por entretenimiento", "30 minutos o menos", "Entre 1 y 2 horas", "Entre 30 y 60 minutos", "Más de 2 horas"))
@@ -325,14 +329,14 @@ data$ESTU_DEDICACIONINTERNET <- as.numeric(data$ESTU_DEDICACIONINTERNET)
 Después de la conversión, creé un nuevo dataframe que incluye estas variables numéricas junto con otras variables relevantes como puntajes globales, desempeño en inglés, lectura crítica, matemáticas, ciencias y sociales. Además, se verifico y corrijo la presencia de valores perdidos (NA) en el nuevo dataframe, eliminándolos para garantizar una análisis robusto.
 
 ```{r cor_matrix}
-matrix_df <- data[, c("FAMI_ESTRATOVIVIENDA", "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA", "FAMI_EDUCACIONMADRE", "FAMI_EDUCACIONPADRE", "FAMI_NUMLIBROS", "ESTU_DEDICACIONINTERNET", "PUNT_GLOBAL", "PUNT_INGLES", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS", "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS")]
+matrix_df <- data[, c("FAMI_ESTRATOVIVIENDA", "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA", "FAMI_EDUCACIONMADRE", "FAMI_EDUCACIONPADRE", "FAMI_NUMLIBROS", "ESTU_DEDICACIONINTERNET",  "ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL", "PUNT_INGLES", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS", "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS")]
 
 sum(is.na(matrix_df)) # Contar los NA
 
 matrix_df <- matrix_df[complete.cases(matrix_df), ] # Quitar los NA del nuevo dataframe
 
 # Cambiar los nombres de las columnas para una matrix más legible
-colnames(matrix_df) <- c("estrato", "lectura_diaria", "horas_trabajo", "educacion_madre", "educacion_padre", "num_libros", "dedicacion_internet", "punt_global", "punt_ingles", "desempenio_lectura", "desempenio_mate", "desempenio_ciencias", "desempenio_sociales")
+colnames(matrix_df) <- c("estrato", "lectura_diaria", "horas_trabajo", "educacion_madre", "educacion_padre", "num_libros", "dedicacion_internet", "nivel_socioeconomico","punt_global", "punt_ingles", "desempenio_lectura", "desempenio_mate", "desempenio_ciencias", "desempenio_sociales")
 
 correlation_matrix <- cor(matrix_df)
 
@@ -344,9 +348,13 @@ corrplot::corrplot(correlation_matrix, type = "lower", tl.cex=0.7)
 
 - Se evidencia que la educación de los padres tiende a ser mayor conforme el estrato y que eso mismo se ve reflejados en puntajes un poco más altos de forma global y más específicamente en un mayor puntaje en inglés.
 - Sacar más puntaje en un área específica tiene una correlación directa con sacar más puntaje en las demás áreas y sobre todo en el puntaje global como es obvio.
+- Se observa una leve correlación entre la cantidad de libros y el puntaje. Aunque entre la cantidad de libros y la dedicación a leer no. Es extraño.
 
 ### Análisis socioeconómico {.tabset}
-#### Correlación entre el nivel socioeconómico y el desempeño académico: 
+
+Se analiza la correlación entre varias variables, como el nivel socieconomico, el tipo de colegio (público/privado) o (bilingüe/no bilingüe), tiempo de dedicación a la lectura, el nivel educativo de los padres y el puntaje obtenido por los estudiantes.
+
+#### Nivel socioeconómico 
 
 Analizamos si existe una correlación entre el desempeño académico y el nivel socioeconómico del estudiante.
 
@@ -354,169 +362,256 @@ Para ello, lo primero que debemos hacer es crear un dataframe con las dos variab
 
 ```{r c_des_nse}
 library(ggplot2)
+library(dplyr)
 
-nuevo_df <- data[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las dos columnas de interés
+des_nse_df <- data[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las dos columnas de interés
 
-sum(is.na(nuevo_df)) # Contar la cantidad de NA
-
-nuevo_df <- nuevo_df[complete.cases(nuevo_df), ] # Quitar los NA del nuevo dataframe
-
-sum(is.na(nuevo_df)) # Contar la cantidad de NA
-
-# Calcular matriz de correlación
-correlation_matrix <- cor(nuevo_df[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")])
-
-# Visualizar la matriz de correlación
-corrplot::corrplot(correlation_matrix, method = "color")
-
+# Calcular correlación entre las dos variables
+correlation_value <- cor(des_nse_df$ESTU_NSE_INDIVIDUAL, des_nse_df$PUNT_GLOBAL)
+# Imprimir el valor de correlación
+print(paste("La correlación entre NSE e PUNT_GLOBAL es:", round(correlation_value, 3)))
 ```
  Seguido de esto procedemos a realizar un histograma entre las dos variables, para analizar tendencias a partir del mismo: 
  
-distribucion de las 4 clases
-graficos de lineas para ver las 4 clases
-distribucion para ver que tan probable saque un puntaje
-dependiendo de los factores socioeconomicos tienen tendencia a estar en cierto rango de puntajes
-con la correlacion, se verifica la relacion entre los factores y el puntaje
-para ver la probabilidad, hacer la distribucion de probabilidad
-
-graficas de caja para ver los valores atipicos y donde en que puntajes se concentran los datos
-hacer una grafica con las 4 distribuciones de gauss y un abline con la media de cada una para ver la linea de tendencia
-
-para valor discreto -> caja y bigote
- 
 ```{r c_des_nse_2}
-ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
-    geom_jitter()
-
-
-ggplot(nuevo_df, aes(x = nuevo_df$ESTU_NSE_INDIVIDUAL, y = nuevo_df$PUNT_GLOBAL)) +
-    geom_point() +
-    stat_smooth()
+# Gráfico combinado con líneas de densidad ajustadas por clase socioeconómica
+ggplot(data, aes(x = PUNT_GLOBAL, fill = as.factor(ESTU_NSE_INDIVIDUAL))) +
+  geom_density(alpha = 0.6, adjust = 1) +
+  labs(title = "Distribución de puntajes por nivel socioeconómico", x = "Puntaje global", y = "Densidad") +
+  scale_fill_discrete(name = "Nivel socioeconómico") +
+  theme_minimal()
 ```
 
 Del cual podemos concluir que
 
-#### Correlacion entre el tipo de colegio y el desempeño académico
 
-Analizamos si el tipo de colegio (público/privado, urbano/rural, bilingüe) se correlaciona con el desempeño académico 
+#### Tipo de colegio
+
+Analizamos si el tipo de colegio (público/privado, bilingüe/no bilingüe) se correlaciona con el desempeño académico 
 
 ¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
 
-```{r c_des_tc_1}
+```{r c_des_tc}
+library(ggplot2)
+library(tidyr)
+# Calcular el promedio de puntajes por tipo de colegio
+promedios <- data %>%
+  group_by(COLE_NATURALEZA) %>%
+  summarise(
+    Promedio_Lectura = mean(PUNT_LECTURA_CRITICA),
+    Promedio_Matematicas = mean(PUNT_MATEMATICAS),
+    Promedio_Ciencias = mean(PUNT_C_NATURALES),
+    Promedio_Ingles = mean(PUNT_INGLES),
+    Promedio_Sociales = mean(PUNT_SOCIALES_CIUDADANAS)
+  )
 
-nuevo_df <- data[, c("COLE_NATURALEZA", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las columnas de interés
-
-nuevo_df_limpiado_1 <- nuevo_df[complete.cases(nuevo_df) & apply(nuevo_df, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
-
-sum(is.na(nuevo_df)) # Contar la cantidad de NA
-
-# Crear un gráfico de caja para visualizar la relación
-ggplot(nuevo_df_limpiado_1, aes(x = nuevo_df_limpiado_1$COLE_NATURALEZA, y = nuevo_df_limpiado_1$PUNT_GLOBAL)) +
-  geom_boxplot() +
-  labs(x = "Naturaleza del Colegio", y = "Puntaje Global") +
-  ggtitle("Distribución del Puntaje Global por Naturaleza del Colegio")
-```
-
-```{r c_des_tc_2}
-
-nuevo_df_2 <- data[, c("COLE_BILINGUE", "DESEMP_INGLES")]
-
-nuevo_df_limpiado_2 <- nuevo_df_2[complete.cases(nuevo_df_2) & apply(nuevo_df_2, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
-
-sum(is.na(nuevo_df_2)) # Contar la cantidad de NA
-
-# Crear una tabla de contingencia
-tabla_contingencia <- table(nuevo_df_limpiado_2$COLE_BILINGUE, nuevo_df_limpiado_2$DESEMP_INGLES)
+# Reorganizar los datos para el gráfico de barras apiladas
+stacked_data <- promedios %>%
+  pivot_longer(cols = starts_with("Promedio"), names_to = "Area", values_to = "Promedio")
 
 # Crear el gráfico de barras apiladas
-barplot(tabla_contingencia, beside = TRUE, legend.text = rownames(tabla_contingencia),
-        col = c("lightblue", "lightgreen"),
-        main = "Gráfico de Barras Apiladas")
-
-
-summary(nuevo_df_limpiado_2)
-```
-
-#### Correlacion entre el tiempo dedicado a leer y el desempeño
-
-¿Hay alguna relación entre el tiempo dedicado a leer y sus puntajes? 
-
-```{r c_des_dlec_1}
-
-nuevo_df_4 <- data[, c("ESTU_DEDICACIONLECTURADIARIA", "PUNT_GLOBAL")] # Crear un nuevo dataframe las columnas de interés
-
-nuevo_df_limpiado_4 <- nuevo_df_4[complete.cases(nuevo_df_4) & apply(nuevo_df_4, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
-
-sum(is.na(nuevo_df_4)) # Contar la cantidad de N
-
-# Crear un gráfico de caja para ESTU_DEDICACIONLECTURADIARIA
-ggplot(nuevo_df_limpiado_4, aes(x = nuevo_df_limpiado_4$ESTU_DEDICACIONLECTURADIARIA, y = nuevo_df_limpiado_4$PUNT_GLOBAL)) +
-  geom_boxplot(fill = "lightblue", color = "black") +
-  labs(title = "Relación entre tiempo dedicado a la lectura  y Puntaje Global",
-       x = "Tiempo de lectura",
-       y = "Puntaje Global")
+ggplot(stacked_data, aes(x = COLE_NATURALEZA, y = Promedio, fill = Area)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(aes(label = round(Promedio, 2)), 
+            position = position_stack(vjust = 0.5), 
+            color = "white", size = 4) +
+  labs(title = "Desempeño promedio por área y tipo de colegio",
+       x = "Tipo de colegio",
+       y = "Puntaje promedio") +
+  theme_minimal() +
+  theme(legend.position = "right")
 
 ```
 
-#### Correlacion entre el nivel educativo de los padres y puntaje
+
+#### Nivel educativo de los padres
 
 ¿Los hijos de padres con niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
 
-```{r c_des_ne_1}
+```{r c_des_ne}
+library(ggplot2)
 
-nuevo_df_3 <- data[, c("FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las tres columnas de interés
+# Mapear los valores numéricos a sus etiquetas correspondientes
+matrix_df$educacion_padre <- factor(matrix_df$educacion_padre, levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+                                   labels = c("Ninguno", "Primaria incompleta", "Primaria completa", "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa", "Técnica o tecnológica incompleta", "Técnica o tecnológica completa", "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
 
-nuevo_df_limpiado_3 <- nuevo_df_3[complete.cases(nuevo_df_3) & apply(nuevo_df_3, 1, function(x) all(x != "")), ] #quitar los "" del nuevo dataframe
+matrix_df$educacion_madre <- factor(matrix_df$educacion_madre, levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+                                   labels = c("Ninguno", "Primaria incompleta", "Primaria completa", "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa", "Técnica o tecnológica incompleta", "Técnica o tecnológica completa", "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
 
-sum(is.na(nuevo_df_3)) # Contar la cantidad de NA
+# Combinar las columnas en una sola para el gráfico
+combined_df <- matrix_df %>%
+  gather(key = "tipo_educacion", value = "nivel_educacion", educacion_padre, educacion_madre)
 
-# Crear un gráfico de caja para FAMI_EDUCACIONPADRE
-ggplot(nuevo_df_limpiado_3, aes(x = nuevo_df_limpiado_3$FAMI_EDUCACIONPADRE, y = nuevo_df_limpiado_3$PUNT_GLOBAL)) +
-  geom_boxplot(fill = "lightblue", color = "black") +
-  labs(title = "Relación entre Educación del Padre y Puntaje Global",
-       x = "Educación del Padre",
-       y = "Puntaje Global")
+# Reordenar niveles de la columna 'nivel_educacion'
+combined_df$nivel_educacion <- factor(combined_df$nivel_educacion,
+                                      levels = c("Ninguno", "Primaria incompleta", "Primaria completa",
+                                                 "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa",
+                                                 "Técnica o tecnológica incompleta", "Técnica o tecnológica completa",
+                                                 "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
 
-# Crear un gráfico de caja para FAMI_EDUCACIONMADRE
-ggplot(nuevo_df_limpiado_3, aes(x = nuevo_df_limpiado_3$FAMI_EDUCACIONMADRE, y = nuevo_df_limpiado_3$PUNT_GLOBAL)) +
-  geom_boxplot(fill = "lightgreen", color = "black") +
-  labs(title = "Relación entre Educación de la Madre y Puntaje Global",
-       x = "Educación de la Madre",
-       y = "Puntaje Global")
+# Crear el gráfico de caja
+ggplot(combined_df, aes(x = nivel_educacion, y = punt_global, fill = tipo_educacion)) +
+  geom_boxplot() +
+  labs(title = "Relación entre educación de los padres y puntaje global",
+       x = "Nivel de educación",
+       y = "Puntaje global") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas x si es necesario
+
 ```
 
 
 
 
+### Acceso a recursos {.tabset}
 
+#### Computador
 
-### Acceso a recursos
-cojo los que no tienen computador, saco los puntajes y una grafica de los puntajes
-cojo los que tienen y saco los puntajes y hago la grafica como lineas.
-en una sola grafica muestro ambas lineas
-muestro la correlacion y si sale alta puedo sacar la conclusion
-alta o baja
-si es positiva o cercana a 1, alta correlacion entre los que no tienen y los que si
-si sale negativa, correlacion inversa entre los que no tienen pc y les va peor
-#### Tiene computador y puntaje
 ```{r cor_tienepc_punt}
-# Filtrar para tener solo estudiantes con y sin computadora
-data_valid <- data[data$FAMI_TIENECOMPUTADOR %in% c("Si", "No"), ]
+# Crear un nuevo dataframe con un índice para representar a los estudiantes
+data$indice <- seq_along(data$PUNT_GLOBAL)
 
-# Calcular la media de los puntajes para cada grupo
-media_puntajes <- tapply(data_valid$PUNT_GLOBAL, data_valid$FAMI_TIENECOMPUTADOR, mean)
+# Filtrar datos para quienes tienen y no tienen computadora
+con_computadora <- data[data$FAMI_TIENECOMPUTADOR == "Si", ]
+sin_computadora <- data[data$FAMI_TIENECOMPUTADOR == "No", ]
 
-# Realizar análisis descriptivo
-summary(data_valid$PUNT_GLOBAL)
+# Unir ambos datasets
+combined_data <- rbind(
+  data.frame(TieneComputadora = "Sí", PUNT_GLOBAL = con_computadora$PUNT_GLOBAL),
+  data.frame(TieneComputadora = "No", PUNT_GLOBAL = sin_computadora$PUNT_GLOBAL)
+)
 
-# Visualizar las diferencias en puntajes medios
-barplot(media_puntajes, 
-        main = "Puntaje Medio por tener o no tener Computadora",
-        xlab = "Tiene Computadora",
-        ylab = "Puntaje Medio")
+# Graficar los puntajes de los dos grupos en un solo gráfico de caja
+ggplot(combined_data, aes(x = TieneComputadora, y = PUNT_GLOBAL, fill = TieneComputadora)) +
+  geom_boxplot() +
+  labs(title = "Puntajes según el acceso a un computador",
+       x = "Tiene computador",
+       y = "Puntaje global") +
+  theme_minimal()
+
+# Calcular correlación entre puntajes y tener computadora
+correlacion_con <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENECOMPUTADOR == "Si"))
+
+# Calcular correlación entre puntajes y tener computadora
+correlacion_sin <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENECOMPUTADOR == "No"))
+
+# Mostrar la correlación
+cat("La correlación entre tener computador y el puntaje es:", correlacion_con)
+
+cat("La correlación entre no tener computador y el puntaje es:", correlacion_sin)
+```
+
+#### Internet
+
+```{r c_internet_des}
+# Crear un nuevo dataframe con un índice para representar a los estudiantes
+data$indice <- seq_along(data$PUNT_GLOBAL)
+
+# Filtrar datos para quienes tienen y no tienen computadora
+con_computadora <- data[data$FAMI_TIENEINTERNET == "Si", ]
+sin_computadora <- data[data$FAMI_TIENEINTERNET == "No", ]
+
+# Unir ambos datasets
+combined_data <- rbind(
+  data.frame(TieneInternet = "Sí", PUNT_GLOBAL = con_computadora$PUNT_GLOBAL),
+  data.frame(TieneInternet = "No", PUNT_GLOBAL = sin_computadora$PUNT_GLOBAL)
+)
+
+# Graficar los puntajes de los dos grupos en un solo gráfico de caja
+ggplot(combined_data, aes(x = TieneInternet, y = PUNT_GLOBAL, fill = TieneInternet)) +
+  geom_boxplot() +
+  labs(title = "Puntajes según el acceso a Internet",
+       x = "Tiene Internet",
+       y = "Puntaje global") +
+  theme_minimal()
+
+# Calcular correlación entre puntajes y tener computadora
+correlacion_con <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENEINTERNET == "Si"))
+
+# Calcular correlación entre puntajes y tener computadora
+correlacion_sin <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENEINTERNET == "No"))
+
+# Mostrar la correlación
+cat("La correlación entre tener Internet y el puntaje es:", correlacion_con)
+
+cat("La correlación entre no tener Internet y el puntaje es:", correlacion_sin)
+```
+
+
+### Uso de tiempo {.tabset}
+
+#### Tiempo dedicado a Internet
+```{r c_des_dint}
+# Mapear los valores numéricos a sus etiquetas correspondientes
+matrix_df$dedicacion_internet <- factor(matrix_df$dedicacion_internet, levels = c(1, 2, 3, 4),
+                                   labels = c("No Navega Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
+
+# Crear el gráfico de caja
+ggplot(matrix_df, aes(x = dedicacion_internet, y = punt_global)) +
+  geom_boxplot() +
+  labs(title = "Distribución de puntajes por tiempo dedicado a Internet",
+       x = "Tiempo en Internet",
+       y = "Puntaje global") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas x si es necesario
+
+# Calcular correlación entre puntajes y tener computadora
+correlacion <- cor(matrix_df$punt_global, as.numeric(matrix_df$dedicacion_internet))
+
+# Mostrar la correlación
+cat("La correlación entre el tiempo dedicado a Internet y el puntaje es:", correlacion)
+
+```
+
+#### Tiempo dedicado a leer 
+
+¿Hay alguna relación entre el tiempo dedicado a leer y sus puntajes? 
+
+```{r c_des_dlec}
+# Mapear los valores numéricos a sus etiquetas correspondientes
+matrix_df$lectura_diaria <- factor(matrix_df$lectura_diaria, levels = c(1, 2, 3, 4, 5),
+                                   labels = c("No leo por entretenimiento", "30 minutos o menos",
+                                              "Entre 1 y 2 horas", "Entre 30 y 60 minutos",
+                                              "Más de 2 horas"))
+
+# Crear el gráfico de caja
+ggplot(matrix_df, aes(x = lectura_diaria, y = punt_global)) +
+  geom_boxplot() +
+  labs(title = "Distribución de puntajes por tiempo de lectura diaria",
+       x = "Tiempo de lectura",
+       y = "Puntaje global") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas x si es necesario
+
+# Calcular correlación entre puntajes y tener computadora
+correlacion <- cor(matrix_df$punt_global, as.numeric(matrix_df$lectura_diaria))
+
+# Mostrar la correlación
+cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlacion)
+
+```
+
+#### Tiempo dedicado a trabajar
+```{r c_des_dtrab}
+# Mapear los valores numéricos a sus etiquetas correspondientes
+matrix_df$horas_trabajo <- factor(matrix_df$horas_trabajo, levels = c(1, 2, 3, 4, 5),
+                                   labels = c("0", "Menos de 10 horas", "Entre 11 y 20 horas", "Entre 21 y 30 horas", "Más de 30 horas"))
+
+# Crear el gráfico de caja
+ggplot(matrix_df, aes(x = horas_trabajo, y = punt_global)) +
+  geom_boxplot() +
+  labs(title = "Distribución de puntajes por tiempo de trabajo semanal",
+       x = "Tiempo de trabajo",
+       y = "Puntaje global") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas x si es necesario
+
+# Calcular correlación entre puntajes y tener computadora
+correlacion <- cor(matrix_df$punt_global, as.numeric(matrix_df$horas_trabajo))
+
+# Mostrar la correlación
+cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlacion)
+
 ```
 
 ### Análisis demografico
+
 Para este análisis, correspondiente a el mapeo de los promedios de puntajes por departamentos y municipios, se lleva a cabo:
 La carga de los mapas corresponientes a departamentos y municipios.
 Separación de datos y cálculo de media del puntaje por departamento o municipio respectivamente.
@@ -525,6 +620,9 @@ JOIN entre el mapa y los puntajes.
 graficación.
 
 ```{r Promedio de notas en los departamentos de Colombia y municipios de Santander}
+library(sf) # trabajar con los tipos de datos geográficos
+library(dplyr) # realizar JOIN
+library(tmap) # graficar mapas
 
 ## Cargando el mapa respectivo
 map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
@@ -598,7 +696,6 @@ qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,30
 ```
 
 ### Correlación entre áreas de conocimiento
-
 ```{r c_puntajes}
 
 nuevo_df_5 <- data[, c("PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES","PUNT_SOCIALES_CIUDADANAS","PUNT_INGLES")]
@@ -621,4 +718,5 @@ ggplot(data = reshape2::melt(matriz_correlacion)) +
                        midpoint = 0, limit = c(-1, 1), space = "Lab",
                        name = "Correlation") +
   theme_minimal() +
-  labs(title = "Matriz de Correlación")
+  labs(title = "Matriz de correlación")
+```
