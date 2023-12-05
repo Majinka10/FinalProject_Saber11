@@ -515,8 +515,29 @@ barplot(media_puntajes,
 
 ### Análisis demografico
 Eaerasdasasddeasdas
-```{r nombre}
-
-```
 
 ### Correlación entre áreas de conocimiento
+
+```{r c_puntajes}
+
+nuevo_df_5 <- data[, c("PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES","PUNT_SOCIALES_CIUDADANAS","PUNT_INGLES")]
+
+sum(is.na(nuevo_df_5)) # Contar la cantidad de NA
+
+nuevo_df_limpiado_5 <- nuevo_df_5[complete.cases(nuevo_df_5), ] # Quitar los NA del nuevo dataframe
+
+sum(is.na(nuevo_df_limpiado_5)) # Contar la cantidad de NA
+
+matriz_correlacion <- cor(nuevo_df_limpiado_5[, c("PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES", "PUNT_SOCIALES_CIUDADANAS", "PUNT_INGLES")])
+
+print(matriz_correlacion)
+
+library(ggplot2)
+
+ggplot(data = reshape2::melt(matriz_correlacion)) +
+  geom_tile(aes(Var1, Var2, fill = value), color = "white") +
+  scale_fill_gradient2(low = "red", mid = "white", high = "blue", 
+                       midpoint = 0, limit = c(-1, 1), space = "Lab",
+                       name = "Correlation") +
+  theme_minimal() +
+  labs(title = "Matriz de Correlación")
