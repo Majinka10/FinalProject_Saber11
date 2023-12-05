@@ -570,6 +570,33 @@ qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220
 
 ```
 
+```{r Mapeo de promedio de colegios en zona urbana y rural}
+## Separando datos Urbano/Rural
+dataUrbano <- data[data$COLE_AREA_UBICACION=="URBANO",]
+dataRural <- data[data$COLE_AREA_UBICACION=="RURAL",]
+
+## Areglando datos
+Puntaje.Urbano <- aggregate(PUNT_GLOBAL~ESTU_COD_RESIDE_DEPTO, FUN = mean, data = dataUrbano)
+Puntaje.Rural <- aggregate(PUNT_GLOBAL~ESTU_COD_RESIDE_DEPTO, FUN = mean, data = dataRural)
+
+Puntaje.Urbano=Puntaje.Urbano[-34,]
+colnames(Puntaje.Urbano) <- c('DPTO_CCDGO','PUNTAJE')
+colnames(Puntaje.Rural) <- c('DPTO_CCDGO','PUNTAJE')
+
+map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
+map2 <- map[,1] # Solo el mapa en terminos de su codigo
+map2$DPTO_CCDGO <- as.numeric(map2$DPTO_CCDGO)
+
+## Uniendo tablas
+mapJoinUrbano <- left_join(map2, Puntaje.Urbano)
+mapJoinRural <- left_join(map2, Puntaje.Rural)
+
+## Graficando
+qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+
+```
+
 ### Correlación entre áreas de conocimiento
 
 ```{r c_puntajes}
