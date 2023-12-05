@@ -341,9 +341,12 @@ correlation_matrix <- cor(matrix_df)
 corrplot::corrplot(correlation_matrix, type = "lower", tl.cex=0.7)
 ```
 
+#### Qué se observa
 
+- Se evidencia que la educación de los padres tiende a ser mayor conforme el estrato y que eso mismo se ve reflejados en puntajes un poco más altos de forma global y más específicamente en un mayor puntaje en inglés.
+- Sacar más puntaje en un área específica tiene una correlación directa con sacar más puntaje en las demás áreas y sobre todo en el puntaje global como es obvio.
 
-### Socioeconómico {.tabset}
+### Análisis socioeconómico {.tabset}
 #### Correlación entre el nivel socioeconómico y el desempeño académico: 
 
 Analizamos si existe una correlación entre el desempeño académico y el nivel socioeconómico del estudiante.
@@ -514,8 +517,35 @@ barplot(media_puntajes,
         ylab = "Puntaje Medio")
 ```
 
-### Demografico
+### Análisis demografico
 Eaerasdasasddeasdas
+<<<<<<< HEAD
 ```{r Promedio de notas en los departamentos de Colombia}
+=======
+>>>>>>> 12998151c25925458a790535c5b31ec018fc3196
 
-```
+### Correlación entre áreas de conocimiento
+
+```{r c_puntajes}
+
+nuevo_df_5 <- data[, c("PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES","PUNT_SOCIALES_CIUDADANAS","PUNT_INGLES")]
+
+sum(is.na(nuevo_df_5)) # Contar la cantidad de NA
+
+nuevo_df_limpiado_5 <- nuevo_df_5[complete.cases(nuevo_df_5), ] # Quitar los NA del nuevo dataframe
+
+sum(is.na(nuevo_df_limpiado_5)) # Contar la cantidad de NA
+
+matriz_correlacion <- cor(nuevo_df_limpiado_5[, c("PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES", "PUNT_SOCIALES_CIUDADANAS", "PUNT_INGLES")])
+
+print(matriz_correlacion)
+
+library(ggplot2)
+
+ggplot(data = reshape2::melt(matriz_correlacion)) +
+  geom_tile(aes(Var1, Var2, fill = value), color = "white") +
+  scale_fill_gradient2(low = "red", mid = "white", high = "blue", 
+                       midpoint = 0, limit = c(-1, 1), space = "Lab",
+                       name = "Correlation") +
+  theme_minimal() +
+  labs(title = "Matriz de Correlación")
