@@ -147,7 +147,7 @@ de nuestro análisis.
 ```{r clean_data}
 columnas_relevantes <- c(
     "ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL", "FAMI_TIENECOMPUTADOR",
-    "FAMI_ESTRATOVIVIENDA", "COLE_NATURALEZA",
+    "FAMI_ESTRATOVIVIENDA", "COLE_NATURALEZA", "COLE_BILINGUE", 
     "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA",
     "ESTU_TIPOREMUNERACION", "FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", 
     "FAMI_NUMLIBROS", "FAMI_TIENEINTERNET", "ESTU_DEDICACIONINTERNET", 
@@ -222,6 +222,7 @@ Variable.desc <- c(
     "¿Cuáles de los siguientes bienes posee su hogar?: Computador",
     "Estrato socioeconómico de la vivienda según recibo de energía eléctrica",
     "Indica la naturaleza del Establecimiento (Privado o público)",
+    "Indica si el Establecimiento es bilingüe o no",
     "Usualmente, ¿cuánto tiempo al día dedica a leer por entretenimiento?",
     "¿Cuántas horas trabajó usted durante la semana pasada?",
     "Tipo de remuneración por trabajar",
@@ -402,6 +403,9 @@ Analizamos si el tipo de colegio (público/privado, bilingüe/no bilingüe) se c
 
 ¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
 
+La gráfica revela diferencias en desempeño por tipo de colegio (oficial/no oficial). 
+Indica una brecha en puntajes, sugiriendo disparidades educativas y socioeconómicas.
+
 ```{r c_des_tc, fig.align='center'}
 # Calcular el promedio de puntajes por tipo de colegio
 promedios <- data %>%
@@ -429,6 +433,15 @@ ggplot(stacked_data, aes(x = COLE_NATURALEZA, y = Promedio, fill = Area)) +
        y = "Puntaje promedio") +
   theme_minimal() +
   theme(legend.position = "right")
+```
+
+Se observa que la diferencia en el desempeño promedio por área entre colegios oficiales
+y no oficiales sugiere una desigualdad significativa en la calidad educativa entre
+estos dos tipos de colegios. Los puntajes más altos en colegios no oficiales,
+especialmente en inglés, matemáticas y lectura crítica, indican una posible brecha
+en la calidad educativa entre los dos tipos de instituciones.
+
+```{r c_des_tc_2} 
 
 # Calcular correlación entre puntajes y tipo de colegio
 correlacion_publico <- cor(data$PUNT_GLOBAL, as.numeric(data$COLE_NATURALEZA == "OFICIAL"))
@@ -442,6 +455,23 @@ cat("La correlación entre tipo de colegio privado y el puntaje es:", correlacio
 cat("La correlación entre tipo de colegio público y el puntaje es:", correlacion_publico)
 ```
 
+La correlación positiva leve pero notable entre el tipo de colegio privado y el
+desempeño académico podría sugerir que, en promedio, los estudiantes de colegios
+privados tienden a obtener puntajes ligeramente más altos. Por otro lado, la
+correlación negativa entre el tipo de colegio público y el puntaje podría indicar
+que los estudiantes de colegios públicos, en promedio, tienden a obtener puntajes
+ligeramente más bajos.
+
+Estas diferencias en el desempeño académico entre tipos de colegios podrían
+relacionarse con factores socioeconómicos. Los colegios no oficiales podrían
+tener recursos financieros y pedagógicos superiores, mientras que los colegios
+oficiales podrían enfrentar desafíos económicos y recursos limitados, lo que podría
+impactar el nivel de educación y, por ende, el desempeño académico.
+
+Es importante tener en cuenta que las diferencias en el desempeño académico pueden
+ser multifacéticas y pueden estar influenciadas por factores más allá del tipo de
+colegio, como el entorno familiar, el acceso a recursos adicionales, por eso, se
+analizan más adelante.
 
 #### Nivel educativo de los padres
 
@@ -483,9 +513,6 @@ ggplot(combined_df, aes(x = nivel_educacion, y = punt_global, fill = tipo_educac
 print(paste("La correlación entre el nivel educativo del padre y el puntaje es:", round(correlation_padre, 3)))
 print(paste("La correlación entre el nivel educativo de la madre y el puntaje es:", round(correlation_madre, 3)))
 ```
-
-
-
 
 ### Acceso a recursos
 
@@ -588,7 +615,7 @@ Por último, se hace el cálculo de la correlación entre el puntaje y la dedica
 # Mapear los valores numéricos a sus etiquetas correspondientes
 if (dedicacion_internet.ejecutado == FALSE) {
   matrix_df$dedicacion_internet <- factor(matrix_df$dedicacion_internet, levels = c(1, 2, 3, 4),
-                                   labels = c("No Navega Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
+                                   labels = c("No navega en Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
   
   dedicacion_internet.ejecutado = TRUE
 }
