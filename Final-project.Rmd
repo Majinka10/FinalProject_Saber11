@@ -20,27 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introducción
 
-En el contexto educativo actual, comprender los factores que influyen en
-el rendimiento académico de los estudiantes es fundamental, por esta
-razón, el proyecto se centra en investigar y analizar en profundidad los
-determinantes detrás de los resultados obtenidos en las pruebas Saber
-11. Este examen nacional es un referente clave en la evaluación del
-sistema educativo, y explorar los elementos que impactan estos
-resultados puede ofrecer valiosas perspectivas para mejorar el proceso
-educativo.
-
-Conforme a ello, el análisis se basará en un conjunto de datos de las
-pruebas Saber 11 2022-2, que contiene información sobre los siguientes
-aspectos de los estudiantes:
-
-* Socioeconómico: estrato socioeconómico, nivel educativo de los padres,
-ingresos familiares, etc. 
-
-* Demográfico: región, género, etnia, etc.
-
-* Académico: rendimiento en las pruebas Saber 11, asistencia escolar, etc.
-
-* Familiar: estructura familiar, apoyo parental, etc.
+En el contexto educativo actual, comprender los factores que influyen en el rendimiento académico de los estudiantes es fundamental. Por ello, el objetivo de este proyecto es investigar y analizar en profundidad los determinantes detrás de los resultados obtenidos en las pruebas Saber 11. Para ello, se estudia un conjunto de datos que contiene información general distribuida en cuatro categorías principales: estudiante, familia, colegio y aspectos relacionados con la prueba. Los análisis se realizarán a través de Rstudio, utilizando técnicas estadísticas y demográficas como la correlación de variables para describir relaciones entre columnas, así como análisis de gráficos y un análisis espacial. Es importante señalar que el examen Saber 11 es un referente clave en la evaluación del sistema educativo colombiano. Por lo tanto, explorar los elementos que impactan sus resultados puede ofrecer valiosas perspectivas para mejorar el proceso educativo.
 
 
 ## Paquetes requeridos 
