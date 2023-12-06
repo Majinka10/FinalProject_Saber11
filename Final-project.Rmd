@@ -39,21 +39,12 @@ Para reproducir el código y los resultados a lo largo de este proyecto, fue nec
 ``` {r packages, eval= TRUE}
 library(knitr)
 library(DT)
-<<<<<<< HEAD
 library(ggplot2) # visualizing data
 library(sf) # trabajar con tipos de datos geográficos
 library(dplyr) # realizar JOIN
 library(tmap) # graficar mapas
-
-=======
-library(ggplot2) 
-library(dplyr)
-library(sf) 
-library(dplyr) 
-library(tmap) 
 library(reshape2)
 library(tidyr)
->>>>>>> 7d8f333bf30a74466a4c953f8e8bf511c4808e77
 ```
     
 
@@ -637,13 +628,11 @@ JOIN entre el mapa y los puntajes.
 Graficación.
 
 ```{r Promedio de notas en los departamentos de Colombia y municipios de Santander}
-<<<<<<< HEAD
+
 library(sf) # trabajar con tipos de datos geográficos
 library(dplyr) # realizar JOIN
 library(tmap) # graficar mapas
 
-=======
->>>>>>> 7d8f333bf30a74466a4c953f8e8bf511c4808e77
 ## Cargando el mapa respectivo
 map_departamentos <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
 map_municipios <- st_read("MGN2022_MPIO_POLITICO/MGN_MPIO_POLITICO.shp")
@@ -665,12 +654,10 @@ mapJoin_MPIO <- left_join(map_municipios, Puntaje.MPIO)
 
 ## Graficando
 tmap_options(check.and.fix = TRUE)
-<<<<<<< HEAD
+
 qtm(mapJoin_Depto,"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
 qtm(mapJoin_MPIO[mapJoin_MPIO$DPTO_CCDGO=="68",],"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
-=======
-qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
->>>>>>> 7d8f333bf30a74466a4c953f8e8bf511c4808e77
+
 ```
 
 #### Comparacion zonas urbanas y rurales 
@@ -704,10 +691,10 @@ qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,2
 qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
 ```
 
+
 ## Conclusiones
-<<<<<<< HEAD
+
+
 ## Referencias
 
-=======
-## Referencias
->>>>>>> 7d8f333bf30a74466a4c953f8e8bf511c4808e77
+
