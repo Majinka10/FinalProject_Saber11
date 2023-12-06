@@ -28,20 +28,34 @@ En el contexto educativo actual, comprender los factores que influyen en el rend
 Para reproducir el código y los resultados a lo largo de este proyecto, fue necesario cargar los siguientes paquetes.
 
 - **knitr:** Se utiliza para mostrar una tabla alineada en la pantalla.
-- **DT**: Útil para mostrar datos tabulares de una manera interactiva y configurable, facilitando la exploración y el análisis de los datos.
-- **ggplot2**: Potente para visualizaciones, permite crear una amplia gama de gráficos personalizados y de alta calidad.
+- **DT**: Usado para presentar datos en formato desplazable y ordenable.
+- **ggplot2**: Usada para crear visualizaciones gráficas a partir de datos.
+- **sf**: Usada para el manejo de datos geoespaciales.
+- **dplyr**: Usada para la manipulación de datos y operaciones JOIN.
+- **tmap**: Usada para representar mapas geográficos.
+- **reshape2**: Usada para reorganizar y transformar datos.
+- **tidyr**: Usada para ajustar la estructura de los datos para análisis.
 
-``` {r packages, eval= FALSE}
+``` {r packages, eval= TRUE}
 library(knitr)
 library(DT)
+<<<<<<< HEAD
 library(ggplot2) # visualizing data
 library(sf) # trabajar con tipos de datos geográficos
 library(dplyr) # realizar JOIN
 library(tmap) # graficar mapas
 
+=======
+library(ggplot2) 
+library(dplyr)
+library(sf) 
+library(dplyr) 
+library(tmap) 
+library(reshape2)
+library(tidyr)
+>>>>>>> 7d8f333bf30a74466a4c953f8e8bf511c4808e77
 ```
-
-
+    
 
 ## Preparación de datos {.tabset .tabset-fade}
 
@@ -340,9 +354,6 @@ Analizamos si existe una correlación entre el desempeño académico y el nivel 
 Para ello, lo primero que debemos hacer es crear un dataframe con las dos variables a analizar en este caso: "ESTU_NSE_INDIVIDUAL" y "PUNT_GLOBAL":
 
 ```{r c_des_nse}
-library(ggplot2)
-library(dplyr)
-
 des_nse_df <- data[, c("ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL")] # Crear un nuevo dataframe con las dos columnas de interés
 
 # Calcular correlación entre las dos variables
@@ -371,8 +382,6 @@ Analizamos si el tipo de colegio (público/privado, bilingüe/no bilingüe) se c
 ¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
 
 ```{r c_des_tc}
-library(ggplot2)
-library(tidyr)
 # Calcular el promedio de puntajes por tipo de colegio
 promedios <- data %>%
   group_by(COLE_NATURALEZA) %>%
@@ -408,8 +417,6 @@ ggplot(stacked_data, aes(x = COLE_NATURALEZA, y = Promedio, fill = Area)) +
 ¿Los hijos de padres con niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
 
 ```{r c_des_ne}
-library(ggplot2)
-
 # Mapear los valores numéricos a sus etiquetas correspondientes
 matrix_df$educacion_padre <- factor(matrix_df$educacion_padre, levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
                                    labels = c("Ninguno", "Primaria incompleta", "Primaria completa", "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa", "Técnica o tecnológica incompleta", "Técnica o tecnológica completa", "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
@@ -630,10 +637,13 @@ JOIN entre el mapa y los puntajes.
 Graficación.
 
 ```{r Promedio de notas en los departamentos de Colombia y municipios de Santander}
+<<<<<<< HEAD
 library(sf) # trabajar con tipos de datos geográficos
 library(dplyr) # realizar JOIN
 library(tmap) # graficar mapas
 
+=======
+>>>>>>> 7d8f333bf30a74466a4c953f8e8bf511c4808e77
 ## Cargando el mapa respectivo
 map_departamentos <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
 map_municipios <- st_read("MGN2022_MPIO_POLITICO/MGN_MPIO_POLITICO.shp")
@@ -655,8 +665,12 @@ mapJoin_MPIO <- left_join(map_municipios, Puntaje.MPIO)
 
 ## Graficando
 tmap_options(check.and.fix = TRUE)
+<<<<<<< HEAD
 qtm(mapJoin_Depto,"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
 qtm(mapJoin_MPIO[mapJoin_MPIO$DPTO_CCDGO=="68",],"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
+=======
+qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+>>>>>>> 7d8f333bf30a74466a4c953f8e8bf511c4808e77
 ```
 
 #### Comparacion zonas urbanas y rurales 
@@ -688,9 +702,12 @@ mapJoinRural <- left_join(map_departamentos, Puntaje.Rural)
 ## Graficando
 qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
 qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
-
 ```
 
 ## Conclusiones
+<<<<<<< HEAD
 ## Referencias
 
+=======
+## Referencias
+>>>>>>> 7d8f333bf30a74466a4c953f8e8bf511c4808e77
