@@ -148,7 +148,7 @@ de nuestro análisis.
 ```{r clean_data}
 columnas_relevantes <- c(
     "ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL", "FAMI_TIENECOMPUTADOR",
-    "FAMI_ESTRATOVIVIENDA", "COLE_NATURALEZA",
+    "FAMI_ESTRATOVIVIENDA", "COLE_NATURALEZA", "COLE_BILINGUE", 
     "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA",
     "ESTU_TIPOREMUNERACION", "FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", 
     "FAMI_NUMLIBROS", "FAMI_TIENEINTERNET", "ESTU_DEDICACIONINTERNET", 
@@ -223,6 +223,7 @@ Variable.desc <- c(
     "¿Cuáles de los siguientes bienes posee su hogar?: Computador",
     "Estrato socioeconómico de la vivienda según recibo de energía eléctrica",
     "Indica la naturaleza del Establecimiento (Privado o público)",
+    "Indica si el Establecimiento es bilingüe o no",
     "Usualmente, ¿cuánto tiempo al día dedica a leer por entretenimiento?",
     "¿Cuántas horas trabajó usted durante la semana pasada?",
     "Tipo de remuneración por trabajar",
@@ -439,6 +440,47 @@ cat("La correlación entre tipo de colegio privado y el puntaje es:", correlacio
 cat("La correlación entre tipo de colegio público y el puntaje es:", correlacion_publico)
 ```
 
+```{r c_des_tcbil, fig.align='center'}
+# Calcular el promedio de puntajes por tipo de colegio
+promedios_bilingue <- data %>%
+  filter(!is.na(COLE_BILINGUE) & COLE_BILINGUE %in% c('S', 'N')) %>%
+  group_by(COLE_BILINGUE) %>%
+  summarise(
+    Promedio_Lectura = mean(PUNT_LECTURA_CRITICA),
+    Promedio_Matematicas = mean(PUNT_MATEMATICAS),
+    Promedio_Ciencias = mean(PUNT_C_NATURALES),
+    Promedio_Ingles = mean(PUNT_INGLES),
+    Promedio_Sociales = mean(PUNT_SOCIALES_CIUDADANAS)
+  )
+
+# Reorganizar los datos para el gráfico de barras apiladas
+stacked_data_bilingue <- promedios_bilingue %>%
+  pivot_longer(cols = starts_with("Promedio"), names_to = "Area", values_to = "Promedio")
+
+# Crear el gráfico de barras apiladas
+ggplot(stacked_data_bilingue, aes(x = COLE_BILINGUE, y = Promedio, fill = Area)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(aes(label = round(Promedio, 2)), 
+            position = position_stack(vjust = 0.5), 
+            color = "white", size = 4) +
+  labs(title = "Desempeño promedio por área y tipo de colegio bilingüe",
+       x = "Tipo de colegio",
+       y = "Puntaje promedio") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+# Calcular correlación entre puntajes y tipo de colegio
+correlacion_bil <- cor(data$PUNT_GLOBAL, as.numeric(data$COLE_BILINGUE == "S"))
+
+# Calcular correlación entre puntajes y tipo de colegio
+correlacion_no_bil <- cor(data$PUNT_GLOBAL, as.numeric(data$COLE_BILINGUE == "N"))
+
+# Mostrar la correlación
+cat("La correlación entre tipo de colegio bilingüe y el puntaje es:", correlacion_bil)
+
+cat("La correlación entre tipo de colegio no bilingüe y el puntaje es:", correlacion_no_bil)
+```
+
 
 #### Nivel educativo de los padres
 
@@ -571,7 +613,7 @@ cat("La correlación entre no tener Internet y el puntaje es:", correlacion_sin_
 ```{r c_des_dint, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
 matrix_df$dedicacion_internet <- factor(matrix_df$dedicacion_internet, levels = c(1, 2, 3, 4),
-                                   labels = c("No Navega Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
+                                   labels = c("No navega en Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
 
 # Crear el gráfico de caja
 ggplot(matrix_df, aes(x = dedicacion_internet, y = punt_global)) +
