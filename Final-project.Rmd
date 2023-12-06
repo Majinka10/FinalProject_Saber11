@@ -538,53 +538,50 @@ más adelante.
 
 #### Computador e Internet
 
+Analizamos si el el acceso a recursos, específicamente, computador e Internet,
+se relaciona con el puntaje obtenido, itentando responder la siguiente pregunta:
+¿la disponibilidad de recursos en casa (computadora o Internet) se relaciona con
+el rendimiento académico? 
+
+Para poder responder esta pregunta, primero filtramos los datos, convirtiendo los 
+valores vacíos en las columnas de interés a NA y luego eliminadolos, después, creamos
+una nueva columna que irá en el nuevo dataframe la cual contiene "Sí" para aquellos
+estudiantes que tienen el recurso y "No" para los que no lo tienen. Luego convierte el valor en las columnas a 1 o 0 y calcula la correlación entre estos valores y los
+puntajes globales. Por último, se genera dos gráficos de caja, uno para los puntajes según el acceso a un computador y otro para los puntajes según el acceso a Internet. 
+
 ```{r cor_tienepc_punt}
-# Crear un nuevo dataframe con un índice para representar a los estudiantes
-data$indice <- seq_along(data$PUNT_GLOBAL)
-
-# Filtrar datos para quienes tienen y no tienen computadora
-con_computadora <- data[data$FAMI_TIENECOMPUTADOR == "Si", ]
-sin_computadora <- data[data$FAMI_TIENECOMPUTADOR == "No", ]
-
-# Unir ambos datasets
-combined_data_pc <- rbind(
-  data.frame(TieneComputadora = "Sí", PUNT_GLOBAL = con_computadora$PUNT_GLOBAL),
-  data.frame(TieneComputadora = "No", PUNT_GLOBAL = sin_computadora$PUNT_GLOBAL)
-)
+# Filtrar los datos y crear una nueva columna indicando si tiene computador
+data_pc <- data %>%
+  mutate(FAMI_TIENECOMPUTADOR = na_if(FAMI_TIENECOMPUTADOR, "")) %>%
+  filter(!is.na(FAMI_TIENECOMPUTADOR)) %>%
+  mutate(TieneComputador = ifelse(FAMI_TIENECOMPUTADOR == "Si", "Sí", "No")) %>%
+  select(TieneComputador, PUNT_GLOBAL)
 
 # Calcular correlación entre puntajes y tener computadora
-correlacion_con_pc <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENECOMPUTADOR == "Si"))
+correlacion_con_pc <- cor(data_pc$PUNT_GLOBAL, as.numeric(data_pc$TieneComputador == "Sí"))
 
 # Calcular correlación entre puntajes y tener computadora
-correlacion_sin_pc <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENECOMPUTADOR == "No"))
-
-
+correlacion_sin_pc <- cor(data_pc$PUNT_GLOBAL, as.numeric(data_pc$TieneComputador == "No"))
 ```
 
 ```{r cor_tieneint_punt}
-# Crear un nuevo dataframe con un índice para representar a los estudiantes
-data$indice <- seq_along(data$PUNT_GLOBAL)
+# Filtrar los datos y crear una nueva columna indicando si tiene Internet
+data_internet <- data %>%
+  mutate(FAMI_TIENEINTERNET = na_if(FAMI_TIENEINTERNET, "")) %>%
+  filter(!is.na(FAMI_TIENEINTERNET)) %>%
+  mutate(TieneInternet = ifelse(FAMI_TIENEINTERNET == "Si", "Sí", "No")) %>%
+  select(TieneInternet, PUNT_GLOBAL)
 
-# Filtrar datos para quienes tienen y no tienen internet
-con_computadora <- data[data$FAMI_TIENEINTERNET == "Si", ]
-sin_computadora <- data[data$FAMI_TIENEINTERNET == "No", ]
+# Calcular correlación entre puntajes y tener Internet
+correlacion_con_internet <- cor(data_internet$PUNT_GLOBAL, as.numeric(data_internet$TieneInternet == "Sí"))
 
-# Unir ambos datasets
-combined_data_internet <- rbind(
-  data.frame(TieneInternet = "Sí", PUNT_GLOBAL = con_computadora$PUNT_GLOBAL),
-  data.frame(TieneInternet = "No", PUNT_GLOBAL = sin_computadora$PUNT_GLOBAL)
-)
-
-# Calcular correlación entre puntajes y tener computadora
-correlacion_con_internet <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENEINTERNET == "Si"))
-
-# Calcular correlación entre puntajes y tener computadora
-correlacion_sin_internet <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENEINTERNET == "No"))
+# Calcular correlación entre puntajes y tener Internet
+correlacion_sin_internet <- cor(data_internet$PUNT_GLOBAL, as.numeric(data_internet$TieneInternet == "No"))
 ```
 
 ```{r c_internet_des, fig.align='center'}
 # Gráfico 1: Puntajes según el acceso a un computador
-plot_pc <- ggplot(combined_data_pc, aes(x = TieneComputadora, y = PUNT_GLOBAL, fill = TieneComputadora)) +
+plot_pc <- ggplot(data_pc, aes(x = TieneComputador, y = PUNT_GLOBAL, fill = TieneComputador)) +
   geom_boxplot() +
   labs(title = NULL,
        x = "Tiene computador",
@@ -593,7 +590,7 @@ plot_pc <- ggplot(combined_data_pc, aes(x = TieneComputadora, y = PUNT_GLOBAL, f
   guides(fill = FALSE)  # Ocultar la leyenda de color
 
 # Gráfico 2: Puntajes según el acceso a Internet
-plot_internet <- ggplot(combined_data_internet, aes(x = TieneInternet, y = PUNT_GLOBAL, fill = TieneInternet)) +
+plot_internet <- ggplot(data_internet, aes(x = TieneInternet, y = PUNT_GLOBAL, fill = TieneInternet)) +
   geom_boxplot() +
   labs(title = NULL,
        x = "Tiene Internet",
@@ -603,7 +600,19 @@ plot_internet <- ggplot(combined_data_internet, aes(x = TieneInternet, y = PUNT_
 
 # Organizar los gráficos en una sola ventana gráfica
 grid.arrange(plot_pc, plot_internet, ncol = 2, top = "Puntajes según acceso a un computador o Internet")
+```
 
+Efectivamente sí, tener acceso a un computador o Internet influye fuertemente en el
+puntaje obtenido, en el caso de tener un computador se observa que los estudiantes
+que no tienen acceso a este recurso obtuvieron una media inferior a 230 puntos,
+mientras que los que sí tenían obtuvieron una media superior a los 270 puntos, de
+igual manera con el acceso a Internet.
+
+Estos hallazgos destacan la influencia crucial del acceso a recursos tecnológicos
+en el rendimiento académico. La brecha entre aquellos con y sin acceso a computadoras
+e Internet es evidente, con puntajes significativamente diferentes.
+
+```{r c_internet_des_cor}
 # Mostrar la correlación
 cat("La correlación entre tener computador y el puntaje es:", correlacion_con_pc)
 
@@ -614,6 +623,15 @@ cat("La correlación entre tener Internet y el puntaje es:", correlacion_con_int
 
 cat("La correlación entre no tener Internet y el puntaje es:", correlacion_sin_internet)
 ```
+
+Las correlaciones subrayan esta relación: tener estos recursos correlaciona
+positivamente con puntajes más altos. Esto apunta a desigualdades socioeconómicas
+en el acceso a recursos, impactando la calidad educativa y evidenciando la importancia
+de cerrar estas brechas para una educación equitativa. 
+
+Aunque tener acceso a estos recursos puede impactar positivamente, el tiempo
+que se dedica a estos recursos de manera no adecuada puede ser contraproducente,
+pero para no hacer suposiciones decidimos comprobarlo en el siguiente análisis.
 
 ### Uso de tiempo {.tabset}
 
