@@ -4,7 +4,7 @@ author: "Guillermo Pinto, Carlos García, Jesús Ramírez"
 date: "2023-12-02"
 output:         
     html_document:      
-        code_folding: show      
+        code_folding: hide      
 editor_options: 
   markdown: 
     wrap: 72
@@ -20,27 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introducción
 
-En el contexto educativo actual, comprender los factores que influyen en
-el rendimiento académico de los estudiantes es fundamental, por esta
-razón, el proyecto se centra en investigar y analizar en profundidad los
-determinantes detrás de los resultados obtenidos en las pruebas Saber
-11. Este examen nacional es un referente clave en la evaluación del
-sistema educativo, y explorar los elementos que impactan estos
-resultados puede ofrecer valiosas perspectivas para mejorar el proceso
-educativo.
-
-Conforme a ello, el análisis se basará en un conjunto de datos de las
-pruebas Saber 11 2022-2, que contiene información sobre los siguientes
-aspectos de los estudiantes:
-
-* Socioeconómico: estrato socioeconómico, nivel educativo de los padres,
-ingresos familiares, etc. 
-
-* Demográfico: región, género, etnia, etc.
-
-* Académico: rendimiento en las pruebas Saber 11, asistencia escolar, etc.
-
-* Familiar: estructura familiar, apoyo parental, etc.
+En el contexto educativo actual, comprender los factores que influyen en el rendimiento académico de los estudiantes es fundamental. Por ello, el objetivo de este proyecto es investigar y analizar en profundidad los determinantes detrás de los resultados obtenidos en las pruebas Saber 11. Para ello, se estudia un conjunto de datos que contiene información general distribuida en cuatro categorías principales: estudiante, familia, colegio y aspectos relacionados con la prueba. Los análisis se realizarán a través de Rstudio, utilizando técnicas estadísticas y demográficas como la correlación de variables para describir relaciones entre columnas, así como análisis de gráficos y un análisis espacial. Es importante señalar que el examen Saber 11 es un referente clave en la evaluación del sistema educativo colombiano. Por lo tanto, explorar los elementos que impactan sus resultados puede ofrecer valiosas perspectivas para mejorar el proceso educativo.
 
 
 ## Paquetes requeridos 
@@ -58,6 +38,7 @@ library(ggplot2) # visualizing data
 library(sf) # trabajar con tipos de datos geográficos
 library(dplyr) # realizar JOIN
 library(tmap) # graficar mapas
+
 ```
 
 
@@ -133,25 +114,28 @@ nuestro análisis, eliminándolas para focalizarnos en datos pertinentes.
 
 Las columnas eliminadas abarcaban detalles específicos y contextuales
 poco relevantes para nuestro análisis. Incluían información sobre la
-estructura familiar, ocupación de los padres, alimentación y cantidad de habitaciones en el hogar, así como datos relacionados con el tipo de documento, nacionalidad, género, período de presentación del examen, entre otros.
+estructura familiar, ocupación de los padres, alimentación y cantidad de 
+habitaciones en el hogar, así como datos relacionados con el tipo de documento,
+nacionalidad, género, período de presentación del examen, entre otros.
 
 Estos detalles, aunque podrían ser importantes en otros contextos, no
 aportaban directamente a nuestras investigaciones sobre la correlación
-entre variables socioeducativas, demográficas y el rendimiento académico. 
-Su exclusión nos permitió concentrarnos en datos más pertinentes y directamente vinculados a nuestras áreas de estudio, optimizando así la calidad y relevancia de nuestro análisis.
+entre variables socioeconómicas, demográficas y el rendimiento académico. 
+Su exclusión nos permitió concentrarnos en datos más pertinentes y directamente
+vinculados a nuestras áreas de estudio, optimizando así la calidad y relevancia
+de nuestro análisis.
 
 ```{r clean_data}
 columnas_relevantes <- c(
     "ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL", "FAMI_TIENECOMPUTADOR",
     "FAMI_ESTRATOVIVIENDA", "COLE_NATURALEZA",
     "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA",
-    "FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", "FAMI_NUMLIBROS",
-    "ESTU_DEDICACIONLECTURADIARIA", "FAMI_TIENECOMPUTADOR", "FAMI_TIENEINTERNET",
-    "ESTU_DEDICACIONINTERNET", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS",
-    "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS", "DESEMP_INGLES",
-    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO", "PUNT_INGLES",
-    "PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES",
-    "PUNT_SOCIALES_CIUDADANAS", "COLE_AREA_UBICACION"
+    "ESTU_TIPOREMUNERACION", "FAMI_EDUCACIONPADRE", "FAMI_EDUCACIONMADRE", 
+    "FAMI_NUMLIBROS", "FAMI_TIENEINTERNET", "ESTU_DEDICACIONINTERNET", 
+    "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS", "PUNT_INGLES", 
+    "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS", "PUNT_LECTURA_CRITICA",
+    "PUNT_MATEMATICAS", "PUNT_C_NATURALES", "PUNT_SOCIALES_CIUDADANAS",
+    "ESTU_COD_RESIDE_DEPTO", "ESTU_COD_RESIDE_MCPIO", "COLE_AREA_UBICACION"
 )
 
 data <- data[, columnas_relevantes, drop = FALSE]
@@ -171,26 +155,21 @@ ___
 
 #### Missing values
 
-Además, al buscar correlaciones entre variables socioeducativas y
-rendimiento académico, detectamos que algunos campos contenían valores
-'NA' o vacíos.
+Iniciamos nuestro análisis tratando valores 'NA' o vacíos de manera general, lo
+que resultó en la pérdida de 25K de registros, reduciendo el conjunto a más de
+507K de registros para el análisis exploratorio. Aunque significativo, este
+enfoque nos brindó una visión inicial de la integridad de nuestros datos.
 
-Probamos eliminar 'NA' de manera general, pero resultó en la pérdida
-significativa de datos, reduciendo el conjunto de más de 500K a poco más
-de 7K registros, lo cual es poco representativo.
+Posteriormente, ajustamos nuestra estrategia. Optamos por eliminar 'NA' de
+manera específica en columnas clave para ciertas preguntas analíticas, como en
+la matriz de correlación. Este enfoque nos permitió realizar tratamientos más
+precisos en los datos relevantes sin comprometer la integridad global del conjunto.
 
-Decidimos, por ende, abordar esta limpieza de 'NA' de manera más
-específica, es decir, eliminando los 'NA' solo de las columnas que
-intervengan en resolución de una pregunta en particular. Por ejemplo, si
-se analiza la correlación entre el puntaje obtenido y el nivel
-socioeconómico del estudiante, solo se eliminan los 'NA' de estas dos
-columnas para responder a la pregunta.
-
-Esto nos permitió conservar un tamaño de muestra más representativo y
-relevante para nuestros análisis sin sacrificar información crucial.
-Esta metodología se alinea con el objetivo de garantizar que los datos
-sean lo más precisos y completos posible para abordar las interrogantes
-planteadas sin comprometer la integridad del análisis.
+Esta metodología dual nos ha permitido mantener un tamaño de muestra
+representativo y relevante para nuestros análisis generales, al tiempo que
+garantiza un tratamiento más específico y detallado donde es necesario. Esta
+aproximación se alinea con nuestro objetivo de mantener datos precisos y
+completos, asegurando que nuestras interpretaciones sean fundamentadas y confiables.
 
 ```{r missing_values}
 # Contar la cantidad de NA
@@ -219,50 +198,41 @@ datatable(head(data[, 1:10],50))
 ```{r data_desc}
 Variable.type <- lapply(data,class)
 Variable.desc <- c(
-    "¿Pertenece usted a un grupo étnico minoritario?",
-    "Departamento de residencia",
-    "Código Dane del departamento de residencia",
-    "Municipio de Residencia",
-    "Código Dane del municipio de residencia",
+    "Nivel Socioeconómico del evaluado",
+    "Puntaje total obtenido",
+    "¿Cuáles de los siguientes bienes posee su hogar?: Computador",
+    "Estrato socioeconómico de la vivienda según recibo de energía eléctrica",
+    "Indica la naturaleza del Establecimiento (Privado o público)",
+    "Usualmente, ¿cuánto tiempo al día dedica a leer por entretenimiento?",
+    "¿Cuántas horas trabajó usted durante la semana pasada?",
+    "Tipo de remuneración por trabajar",
     "Nivel educativo más alto alcanzado por el padre",
     "Nivel educativo más alto alcanzado por la madre",
-    "Estrato socioeconómico de la vivienda según recibo de energía eléctrica",
-    "¿Su hogar cuenta con servicio o conexión a internet?",
-    "¿Cuáles de los siguientes bienes posee su hogar?: Computador",
-    "¿Cuáles de los siguientes bienes posee su hogar?: Máquina lavadora de ropa",
-    "¿Cuáles de los siguientes bienes posee su hogar?: Horno Microondas u Horno eléctrico o a gas",
-    "¿Su hogar cuenta con servicio cerrado de televisión?",
-    "¿Cuáles de los siguientes bienes posee su hogar?: Automóvil particular",
-    "¿Cuáles de los siguientes bienes posee su hogar?: Motocicleta",
-    "¿Cuáles de los siguientes bienes posee su hogar?: Consola para juegos electrónicos (PlayStation, Xbox, Nintendo, etc.)",
     "¿Cuántos libros físicos o electrónicos hay en su hogar excluyendo periódicos, revistas, directorios telefónicos y libros del colegio?",
-    "Usualmente, ¿cuánto tiempo al día dedica a leer por entretenimiento?",
+    "¿Su hogar cuenta con servicio o conexión a internet?",
     "Usualmente, ¿cuánto tiempo al día dedica a navegar en internet? Excluya actividades académicas",
-    "¿Cuántas horas trabajó usted durante la semana pasada?",
-    "¿Usted recibe algún tipo de remuneración por trabajar?",
-    "Con respecto al año inmediatamente anterior, la situación económica de su hogar es:",
-    "Indica la naturaleza del Establecimiento (Privado o público)",
-    "Indica si el Establecimiento es bilingüe o no",
-    "Área de ubicación de la Sede (rural o urbano)",
-    "Código Dane del municipio donde está ubicada la Sede",
-    "Nombre del municipio donde está ubicada la Sede",
-    "Código Dane del departamento de la Sede",
-    "Nombre del departamento donde está ubicada la Sede",
-    "Desempeño matemáticas",
-    "Desempeño en inglés",
-    "Desempeño ciencias naturales",
     "Desempeño en lectura crítica",
+    "Desempeño matemáticas",
+    "Puntaje en inglés",
+    "Desempeño ciencias naturales",
     "Desempeño sociales y ciudadanas",
-    "Puntaje total obtenido",
-    "Percentil global en que se encuentra el evaluado",
-    "Nivel Socioeconómico del evaluado",
-    "Nivel Socioeconómico del Establecimiento"
+    "Puntaje en lectura crítica",
+    "Puntaje en matemáticas",
+    "Puntaje en ciencias naturales",
+    "Puntaje sociales y ciudadanas",
+    "Código Dane del departamento de residencia",
+    "Código Dane del municipio de residencia",
+    "Área de ubicación de la Sede (rural o urbano)"
 )
-data.desc <- as.data.frame(cbind(Data.Type = unlist(Variable.type), 
-                                 Variable.Description = Variable.desc))
-colnames(data.desc) <- c("Data Type","Variable Description")
+
+data.desc <- data.frame(
+    Data.Type = unlist(Variable.type), 
+    Descipcion.Variable = Variable.desc,
+    row.names = names(Variable.type)
+)
+
 library(knitr)
-kable(data.desc)
+kable(data.desc, caption = "Diccionario de Datos")
 ```
 
 
@@ -327,19 +297,25 @@ data$FAMI_NUMLIBROS <- as.numeric(data$FAMI_NUMLIBROS)
 data$ESTU_DEDICACIONINTERNET <- factor(data$ESTU_DEDICACIONINTERNET, levels = c("No Navega Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
 #levels(data$ESTU_DEDICACIONINTERNET)
 data$ESTU_DEDICACIONINTERNET <- as.numeric(data$ESTU_DEDICACIONINTERNET)
+
+### Para tipo de remuneracion
+#levels(data$ESTU_TIPOREMUNERACION)
+data$ESTU_TIPOREMUNERACION <- factor(data$ESTU_TIPOREMUNERACION, levels = c("No", "Si, en efectivo", "Si, en efectivo y especie", "Si, en especie"))
+#levels(data$ESTU_TIPOREMUNERACION)
+data$ESTU_TIPOREMUNERACION <- as.numeric(data$ESTU_TIPOREMUNERACION)
 ```
 
 Después de la conversión, creé un nuevo dataframe que incluye estas variables numéricas junto con otras variables relevantes como puntajes globales, desempeño en inglés, lectura crítica, matemáticas, ciencias y sociales. Además, se verifico y corrijo la presencia de valores perdidos (NA) en el nuevo dataframe, eliminándolos para garantizar una análisis robusto.
 
 ```{r cor_matrix}
-matrix_df <- data[, c("FAMI_ESTRATOVIVIENDA", "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA", "FAMI_EDUCACIONMADRE", "FAMI_EDUCACIONPADRE", "FAMI_NUMLIBROS", "ESTU_DEDICACIONINTERNET",  "ESTU_NSE_INDIVIDUAL", "PUNT_GLOBAL", "PUNT_INGLES", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS", "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS")]
+matrix_df <- data[, c("FAMI_ESTRATOVIVIENDA", "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA", "FAMI_EDUCACIONMADRE", "FAMI_EDUCACIONPADRE", "FAMI_NUMLIBROS", "ESTU_DEDICACIONINTERNET",  "ESTU_NSE_INDIVIDUAL", "ESTU_TIPOREMUNERACION","PUNT_GLOBAL", "PUNT_INGLES", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS", "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS")]
 
 sum(is.na(matrix_df)) # Contar los NA
 
 matrix_df <- matrix_df[complete.cases(matrix_df), ] # Quitar los NA del nuevo dataframe
 
 # Cambiar los nombres de las columnas para una matrix más legible
-colnames(matrix_df) <- c("estrato", "lectura_diaria", "horas_trabajo", "educacion_madre", "educacion_padre", "num_libros", "dedicacion_internet", "nivel_socioeconomico","punt_global", "punt_ingles", "desempenio_lectura", "desempenio_mate", "desempenio_ciencias", "desempenio_sociales")
+colnames(matrix_df) <- c("estrato", "lectura_diaria", "horas_trabajo", "educacion_madre", "educacion_padre", "num_libros", "dedicacion_internet", "nivel_socioeconomico", "tipo_remuneracion","punt_global", "punt_ingles", "desempenio_lectura", "desempenio_mate", "desempenio_ciencias", "desempenio_sociales")
 
 correlation_matrix <- cor(matrix_df)
 
@@ -609,8 +585,35 @@ ggplot(matrix_df, aes(x = horas_trabajo, y = punt_global)) +
 correlacion <- cor(matrix_df$punt_global, as.numeric(matrix_df$horas_trabajo))
 
 # Mostrar la correlación
-cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlacion)
+cat("La correlación entre el tiempo dedicado a trabajar en la semana y el puntaje es:", correlacion)
 
+```
+Lo siguiente muestra si los estudiantes que dijeron que trabajaban reciben pago o no.
+Se hace un nuevo dataframe filtrando por los estudiantes que trabajan y a este nuevo dataframe
+se le agrega una nueva columna 'Tipo_Remuneracion_Agrupado donde se agrupan los
+que reciben paga en efectivo, especie o ambas, el otro valor en esta columna es 'No'
+
+```{r c_des_dtrab_2}
+# Mapear los valores numéricos a sus etiquetas correspondientes para tipo de remuneración
+matrix_df$tipo_remuneracion <- factor(matrix_df$tipo_remuneracion, levels = c(1, 2, 3, 4),
+                                   labels = c("No", "Si, en efectivo", "Si, en efectivo y especie", "Si, en especie"))
+
+# Agrupar los estudiantes por tipo de remuneración
+trabajo_mas_20_horas <- matrix_df %>%
+  filter(horas_trabajo %in% c("Menos de 10 horas","Entre 11 y 20 horas","Entre 21 y 30 horas", "Más de 30 horas")) %>%
+  mutate( # Filtrar estudiantes que trabajan entre 21 y 30 horas y más de 30 horas
+    Tipo_Remuneracion_Agrupado = case_when(
+      tipo_remuneracion %in% c("Si, en efectivo", "Si, en efectivo y especie", "Si, en especie") ~ "Sí, en efectivo, especie o ambas",
+      TRUE ~ tipo_remuneracion  # Mantener otros valores sin modificar
+    )
+  )
+
+# Crear el diagrama de barras para el tipo de remuneración
+ggplot(trabajo_mas_20_horas, aes(x = Tipo_Remuneracion_Agrupado)) +
+  geom_bar() +
+  labs(title = "¿Usted recibe algún tipo de remuneración por trabajar?",
+       x = "Tipo de remuneración",
+       y = "Cantidad de estudiantes")
 ```
 
 ### Análisis demografico {.tabset}
@@ -625,6 +628,7 @@ Separar los datos y cálcular la media del puntaje por departamento o municipio 
 Arreglar datos, eliminando casos especiales y cambiando nombres de columnas y tipos de datos.
 JOIN entre el mapa y los puntajes.
 Graficación.
+
 ```{r Promedio de notas en los departamentos de Colombia y municipios de Santander}
 library(sf) # trabajar con tipos de datos geográficos
 library(dplyr) # realizar JOIN
@@ -663,6 +667,7 @@ Separar los datos de los estudiantes en dos conjuntos de acuerdo a la zona (urba
 Quitar los datos no relevantes para la pregunta y dejar solo el departamento y la media del puntaje para cada conjunto de estudiantes
 Hacer el JOIN
 Graficar.
+
 ```{r Mapeo de promedio de colegios en zona urbana y rural}
 ## Separando datos Urbano/Rural
 dataUrbano <- data[data$COLE_AREA_UBICACION=="URBANO",]
@@ -686,32 +691,6 @@ qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,30
 
 ```
 
-### Correlación entre áreas de conocimiento
-
-```{r c_puntajes}
-
-nuevo_df_5 <- data[, c("PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES","PUNT_SOCIALES_CIUDADANAS","PUNT_INGLES")]
-
-sum(is.na(nuevo_df_5)) # Contar la cantidad de NA
-
-nuevo_df_limpiado_5 <- nuevo_df_5[complete.cases(nuevo_df_5), ] # Quitar los NA del nuevo dataframe
-
-sum(is.na(nuevo_df_limpiado_5)) # Contar la cantidad de NA
-
-matriz_correlacion <- cor(nuevo_df_limpiado_5[, c("PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES", "PUNT_SOCIALES_CIUDADANAS", "PUNT_INGLES")])
-
-print(matriz_correlacion)
-
-library(ggplot2)
-
-ggplot(data = reshape2::melt(matriz_correlacion)) +
-  geom_tile(aes(Var1, Var2, fill = value), color = "white") +
-  scale_fill_gradient2(low = "red", mid = "white", high = "blue", 
-                       midpoint = 0, limit = c(-1, 1), space = "Lab",
-                       name = "Correlation") +
-  theme_minimal() +
-  labs(title = "Matriz de correlación")
-```
-
 ## Conclusiones
+## Referencias
 
