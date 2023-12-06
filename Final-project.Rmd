@@ -706,8 +706,13 @@ mapJoin_MPIO <- left_join(map_municipios, Puntaje.MPIO)
 ## Graficando
 tmap_options(check.and.fix = TRUE)
 
-qtm(mapJoin_Depto,"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
-qtm(mapJoin_MPIO[mapJoin_MPIO$DPTO_CCDGO=="68",],"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
+plot_Colombia <- tm_layout(title = "Promedio de puntajes en Colombia", title.position = c("center", "top"), title.size = 1.0, legend.text.size = 0.65) +
+  qtm(mapJoin_Depto,"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
+
+plot_Santander <- tm_layout(title = "Promedio de puntajes en Santander", title.position = c("center", "top"), title.size = 1.0, legend.show = FALSE) +
+  qtm(mapJoin_MPIO[mapJoin_MPIO$DPTO_CCDGO=="68",],"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
+
+tmap_arrange(plot_Colombia, plot_Santander, ncol = 2)
 
 ```
 
@@ -738,8 +743,13 @@ mapJoinUrbano <- left_join(map_departamentos, Puntaje.Urbano)
 mapJoinRural <- left_join(map_departamentos, Puntaje.Rural)
 
 ## Graficando
-qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
-qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+plot_Urbano <- tm_layout(title = "Promedio de puntajes en zonas Urbanas", title.position = c("center", "top"), title.size = 1.0, legend.text.size = 0.65) +
+  qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+plot_Rural <- tm_layout(title = "Promedio de puntajes en zonas Rurales", title.position = c("center", "top"), title.size = 1.0, legend.show = FALSE) +
+  qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+
+tmap_arrange(plot_Urbano, plot_Rural, ncol = 2)
+
 ```
 
 
