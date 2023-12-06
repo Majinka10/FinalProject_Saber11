@@ -53,16 +53,12 @@ library(knitr)
 library(DT)
 library(ggplot2)
 suppressPackageStartupMessages(library(dplyr))
-#library(sf)
+library(sf)
 library(dplyr)
-#library(tmap)
+library(tmap)
 library(reshape2)
 suppressPackageStartupMessages(library(tidyr))
 ```
-
-
-
-    
 
 ## Preparación de datos {.tabset .tabset-fade}
 
@@ -346,9 +342,21 @@ corrplot::corrplot(correlation_matrix, type = "lower", tl.cex=0.7)
 
 #### Qué se observa
 
-- Se evidencia que la educación de los padres tiende a ser mayor conforme el estrato y que eso mismo se ve reflejados en puntajes un poco más altos de forma global y más específicamente en un mayor puntaje en inglés.
-- Sacar más puntaje en un área específica tiene una correlación directa con sacar más puntaje en las demás áreas y sobre todo en el puntaje global como es obvio.
-- Se observa una leve correlación entre la cantidad de libros y el puntaje. Aunque entre la cantidad de libros y la dedicación a leer no. Es extraño.
+Basándonos en la matriz de correlación, podemos concluir que las siguientes variables están correlacionadas entre sí:
+
+* Puntaje global y desempeño en las materias: se puede evidenciar una fuerte correlación entre las materias; siendo más fuerte y positiva entre el desempeño de lectura, ciencias y sociales, así como entre matemáticas e inglés.
+
+* Nivel socioeconómico y el desempeño en las materias: relación ligeramente fuerte y positiva entre el nivel socioeconómico y el puntaje en inglés. Además, Con el resto de materias la relación no es tan fuerte, pero sigue siendo positiva.
+
+* El tiempo dedicado al internet con el nivel socioeconómico.
+
+* El número de libros con el nivel socioeconómico: relación levemente fuerte y positiva; un estudiante con un buen nivel socioeconómico posee más libros en el hogar. Así mismo, Se observa una leve correlación entre la cantidad de libros y el puntaje. Aunque entre la cantidad de libros y la dedicación a leer, no, lo cual es extraño.
+
+* Educación de los padres con el resto de variables: se evidencia que la educación de los padres tiende a ser mayor conforme el nivel socioeconómico y el estrato aumentan, esto mismo se ve reflejado en puntajes un poco más altos de forma global; específicamente en un mayor puntaje en inglés.
+
+* Horas de trabajo y tipo de remuneración: relación fuerte y positiva; de acuerdo al tiempo trabajado será el tipo de remuneración.
+
+Es curioso observar que la lectura diaria no tiene una fuerte correlación con los puntajes en general.
 
 ### Análisis socioeconómico {.tabset}
 
@@ -640,7 +648,7 @@ JOIN entre el mapa y los puntajes.
 graficación.
 
 #### Promedio de notas en deptos y municipio
-```{r Promedio de notas en los departamentos de Colombia y municipios de Santander, fig.align='center'}
+```{r Promedio de notas en los departamentos de Colombia y municipios de Santander, fig.align='center', eval=FALSE}
 ## Cargando el mapa respectivo
 map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
 map2 <- map[,1] # Solo el mapa en terminos de su codigo
@@ -685,7 +693,7 @@ qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220
 ```
 
 #### Comparacion zonas urbanas y rurales 
-```{r Mapeo de promedio de colegios en zona urbana y rural, fig.align='center'}
+```{r Mapeo de promedio de colegios en zona urbana y rural, fig.align='center', eval=FALSE}
 ## Separando datos Urbano/Rural
 dataUrbano <- data[data$COLE_AREA_UBICACION=="URBANO",]
 dataRural <- data[data$COLE_AREA_UBICACION=="RURAL",]
