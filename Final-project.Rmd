@@ -47,7 +47,7 @@ library(tmap)
 library(reshape2)
 library(tidyr)
 ```
-
+    
 
 ## Preparación de datos {.tabset .tabset-fade}
 
@@ -625,15 +625,7 @@ JOIN entre el mapa y los puntajes.
 graficación.
 
 #### Promedio de notas en deptos y municipio
-<<<<<<< Updated upstream
 ```{r Promedio de notas en los departamentos de Colombia y municipios de Santander}
-library(sf) # trabajar con los tipos de datos geográficos
-library(dplyr) # realizar JOIN
-library(tmap) # graficar mapas
-
-=======
-```{r Promedio de notas en los departamentos de Colombia y municipios de Santander, eval=FALSE}
->>>>>>> Stashed changes
 ## Cargando el mapa respectivo
 map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
 map2 <- map[,1] # Solo el mapa en terminos de su codigo
@@ -675,15 +667,10 @@ mapJoin <- left_join(map, Puntaje.MPIO)
 ## Graficando
 tmap_options(check.and.fix = TRUE)
 qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
-
 ```
 
 #### Comparacion zonas urbanas y rurales 
-<<<<<<< Updated upstream
 ```{r Mapeo de promedio de colegios en zona urbana y rural}
-=======
-```{r Mapeo de promedio de colegios en zona urbana y rural, eval=FALSE}
->>>>>>> Stashed changes
 ## Separando datos Urbano/Rural
 dataUrbano <- data[data$COLE_AREA_UBICACION=="URBANO",]
 dataRural <- data[data$COLE_AREA_UBICACION=="RURAL",]
@@ -707,11 +694,6 @@ mapJoinRural <- left_join(map2, Puntaje.Rural)
 ## Graficando
 qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
 qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
-
 ```
 ## Conclusiones
-<<<<<<< Updated upstream
 ## Referencias
-=======
-## Referencias
->>>>>>> Stashed changes
