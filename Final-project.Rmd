@@ -475,7 +475,9 @@ analizan más adelante.
 
 #### Nivel educativo de los padres
 
-¿Los hijos de padres con niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
+Analizamos si el nivel educativo de los padres se relaciona con el desempeño
+académico, intentando responder la siguiente pregunta: ¿Los hijos de padres con
+niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
 
 ```{r c_des_ne, fig.align='center'}
 # Calcular correlación entre las dos variables antes de cambiar los datos a factores
@@ -508,11 +510,29 @@ ggplot(combined_df, aes(x = nivel_educacion, y = punt_global, fill = tipo_educac
        x = "Nivel de educación",
        y = "Puntaje global") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas x si es necesario
+```
 
+Se observa un hallazgo impactante: a medida que los padres alcanzan un nivel educativo
+más alto, se evidencia un notable incremento en los puntajes promedio obtenidos por
+sus hijos. En particular, se observa una marcada brecha entre los hijos de padres con
+estudios de posgrado, cuya media supera los 330, y aquellos cuyos padres tienen nivel
+educativo nulo o primario, con puntajes que no superan los 250.
+
+```{r c_des_ne_2}
 # Imprimir el valor de correlación del padre y madre
 print(paste("La correlación entre el nivel educativo del padre y el puntaje es:", round(correlation_padre, 3)))
 print(paste("La correlación entre el nivel educativo de la madre y el puntaje es:", round(correlation_madre, 3)))
 ```
+
+Esto se ratifica con una correlación positiva considerable entre el nivel educativo
+de los padres y el desempeño académico de sus hijos, sugiriendo así que un entorno
+educativo favorable puede influir de manera significativa en los logros académicos.
+
+A su vez, el nivel educativo de los padres podría incidir en la calidad de la
+enseñanza impartida a sus hijos y en la relevancia que se le otorga a la educación,
+ejerciendo un efecto directo en su rendimiento académico. E incluso, podría reflejar
+desigualdades en el acceso a recursos que apoyen el proceso educativo, tema estudiado
+más adelante.
 
 ### Acceso a recursos
 
