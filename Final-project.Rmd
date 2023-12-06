@@ -611,7 +611,7 @@ cat("La correlación entre el tiempo dedicado a Internet y el puntaje es:", corr
 
 #### Tiempo dedicado a leer 
 
-¿Hay alguna relación entre el tiempo dedicado a leer y sus puntajes? 
+¿Hay alguna relación entre el tiempo dedicado a leer por entretenimiento y los puntajes? 
 
 Una vez respondida la pregunta anterior, esta se torna más sencilla, ya que sigue los mismo pasos.<br>
 Se realiza una condición para no sobrescribir los valores si ya fueron cambiados.  Si la conversión aún no se ha realizado,
@@ -623,7 +623,7 @@ Luego, se calcula e imprime el coeficiente de correlación de ambas variables.
 if (lectura_diaria.ejecutado == FALSE) {
   matrix_df$lectura_diaria <- factor(matrix_df$lectura_diaria, levels = c(1, 2, 3, 4, 5),
                                    labels = c("No leo por entretenimiento", "30 minutos o menos",
-                                              "Entre 1 y 2 horas", "Entre 30 y 60 minutos",
+                                              "Entre 30 y 60 minutos", "Entre 1 y 2 horas",
                                               "Más de 2 horas"))
   lectura_diaria.ejecutado = TRUE
 }
@@ -646,6 +646,15 @@ correlacion <- cor(matrix_df$punt_global, as.numeric(matrix_df$lectura_diaria))
 cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlacion)
 
 ```
+
+##### Qué se observa
+No hay una gran diferencia en los puntajes promedio de las personas que no leen por entretenimiento y las que leen 30 minutos o menos. la media de ambos varía de 245 puntos a 248.
+
+De igual forma, la diferencia entre leer 30 a 60 minutos y leer entre 1 y 2 horas no es muy significativa. Incluso se puede observar un muy ligero descenso, siendo la media de 263 y 261, respectivamente.
+
+Mientras que la media de puntajes de quienes leen más de 2 horas diarias es de 270 puntos.
+
+Si bien la diferencia entre algunos niveles y sus niveles posteriores no es muy amplia, si se observa la diferencia en bloques de 0 a 30 minutos, 30 minutos a 2 horas y mas de 2 horas de lectura diaria. Hay sobre todo una diferencia radical entre leer menos de media hora y leer mas de 2 horas, pasando de una media de 245 a una de 270 puntos.
 
 #### Tiempo dedicado a trabajar
 ¿Tener un trabajo afecta en los puntajes obtenidos en la prueba?
@@ -799,6 +808,8 @@ tmap_arrange(plot_Urbano, plot_Rural, ncol = 2)
 
 
 ## Conclusiones
+
+
 ## Referencias
 - ICFES (2023). DataIcfes. Saber 11. https://www.icfes.gov.co/web/guest/data-icfes
 - Auguié, B. (2019, July 13). Laying out multiple plots on a page. https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html
