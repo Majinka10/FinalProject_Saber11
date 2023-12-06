@@ -55,6 +55,9 @@ Para reproducir el código y los resultados a lo largo de este proyecto, fue nec
 library(knitr)
 library(DT)
 library(ggplot2) # visualizing data
+library(sf) # trabajar con tipos de datos geográficos
+library(dplyr) # realizar JOIN
+library(tmap) # graficar mapas
 ```
 
 
@@ -613,64 +616,53 @@ cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlac
 ### Análisis demografico {.tabset}
 
 #### Promedio de notas en deptos y municipio
-Para este análisis, correspondiente a el mapeo de los promedios de puntajes por departamentos y municipios, se lleva a cabo:
-La carga de los mapas corresponientes a departamentos y municipios.
-Separación de datos y cálculo de media del puntaje por departamento o municipio respectivamente.
-arreglo de datos, eliminando casos especiales y cambiando nombres de columnas y tipos de datos.
-JOIN entre el mapa y los puntajes.
-graficación.
+1. ¿Hay diferencia entre la media de puntajes obtenidos en distintos departamentos de Colombia?
+2. ¿Que tanta diferencia hay entre municipios de Santander?
 
+Para este análisis, correspondiente a el mapeo de los promedios de puntajes por departamentos y municipios, se lleva a cab
+Cargar los mapas corresponientes a departamentos y municipios.
+Separar los datos y cálcular la media del puntaje por departamento o municipio respectivamente.
+Arreglar datos, eliminando casos especiales y cambiando nombres de columnas y tipos de datos.
+JOIN entre el mapa y los puntajes.
+Graficación.
 ```{r Promedio de notas en los departamentos de Colombia y municipios de Santander}
-library(sf) # trabajar con los tipos de datos geográficos
+library(sf) # trabajar con tipos de datos geográficos
 library(dplyr) # realizar JOIN
 library(tmap) # graficar mapas
 
 ## Cargando el mapa respectivo
-map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
-map2 <- map[,1] # Solo el mapa en terminos de su codigo
+map_departamentos <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
+map_municipios <- st_read("MGN2022_MPIO_POLITICO/MGN_MPIO_POLITICO.shp")
 
-## Separando y arreglando los datos de interes de "data"
+## Separando y arreglando los datos de interés de "data"
+Puntaje.Depto <- aggregate(PUNT_GLOBAL ~ ESTU_COD_RESIDE_DEPTO, FUN = mean, data = data)
+Puntaje.Depto <- Puntaje.Depto[-34,]
+colnames(Puntaje.Depto) <- c('DPTO_CCDGO', 'PUNTAJE')
 
-Puntaje.Depto<-aggregate(PUNT_GLOBAL~ESTU_COD_RESIDE_DEPTO, FUN = mean, data = data)
+Puntaje.MPIO <- aggregate(PUNT_GLOBAL ~ ESTU_COD_RESIDE_MCPIO, FUN = mean, data = data)
+Puntaje.MPIO <- Puntaje.MPIO[-1118,]
+colnames(Puntaje.MPIO) <- c('MPIO_CDPMP', 'PUNTAJE')
 
-Puntaje.Depto=Puntaje.Depto[-34,]
-colnames(Puntaje.Depto) <- c('DPTO_CCDGO','PUNTAJE')
-
-map2$DPTO_CCDGO <- as.numeric(map2$DPTO_CCDGO)
-
+map_departamentos$DPTO_CCDGO <- as.numeric(map_departamentos$DPTO_CCDGO)
+map_municipios$MPIO_CDPMP <- as.numeric(map_municipios$MPIO_CDPMP)
 ## Uniendo tablas
-mapJoin <- left_join(map2, Puntaje.Depto)
-
-## Graficando
-qtm(mapJoin,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
-
-#MUNICIPIOS
-
-## Cargando el mapa respectivo
-map <- st_read("MGN2022_MPIO_POLITICO/MGN_MPIO_POLITICO.shp")
-map2 <- map[,1,3] # Solo el mapa en terminos de su codigo
-#plot(map2)
-
-## Separando y arreglando los datos de interes de "data"
-Puntaje.MPIO<-aggregate(PUNT_GLOBAL~ESTU_COD_RESIDE_MCPIO, FUN = mean, data = data)
-
-Puntaje.MPIO=Puntaje.MPIO[-1118,]
-colnames(Puntaje.MPIO) <- c('MPIO_CDPMP','PUNTAJE')
-
-colnames(map2) <- c('MCPIO_CCDGO','geometry')
-Puntaje.MPIO$MPIO_CDPMP <- as.character(Puntaje.MPIO$MPIO_CDPMP)
-
-## Uniendo tablas
-mapJoin <- left_join(map, Puntaje.MPIO)
+mapJoin_Depto <- left_join(map_departamentos, Puntaje.Depto)
+mapJoin_MPIO <- left_join(map_municipios, Puntaje.MPIO)
 
 ## Graficando
 tmap_options(check.and.fix = TRUE)
-qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
-
+qtm(mapJoin_Depto,"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
+qtm(mapJoin_MPIO[mapJoin_MPIO$DPTO_CCDGO=="68",],"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
 ```
 
 #### Comparacion zonas urbanas y rurales 
+¿Existe diferencia entre la educación en zonas urbanas y la educación en zonas rurales?
 
+Siguiendo los lineamientos de la pregunta anterior, este analisis consiste en:
+Separar los datos de los estudiantes en dos conjuntos de acuerdo a la zona (urbano y rural)
+Quitar los datos no relevantes para la pregunta y dejar solo el departamento y la media del puntaje para cada conjunto de estudiantes
+Hacer el JOIN
+Graficar.
 ```{r Mapeo de promedio de colegios en zona urbana y rural}
 ## Separando datos Urbano/Rural
 dataUrbano <- data[data$COLE_AREA_UBICACION=="URBANO",]
@@ -684,13 +676,9 @@ Puntaje.Urbano=Puntaje.Urbano[-34,]
 colnames(Puntaje.Urbano) <- c('DPTO_CCDGO','PUNTAJE')
 colnames(Puntaje.Rural) <- c('DPTO_CCDGO','PUNTAJE')
 
-map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
-map2 <- map[,1] # Solo el mapa en terminos de su codigo
-map2$DPTO_CCDGO <- as.numeric(map2$DPTO_CCDGO)
-
 ## Uniendo tablas
-mapJoinUrbano <- left_join(map2, Puntaje.Urbano)
-mapJoinRural <- left_join(map2, Puntaje.Rural)
+mapJoinUrbano <- left_join(map_departamentos, Puntaje.Urbano)
+mapJoinRural <- left_join(map_departamentos, Puntaje.Rural)
 
 ## Graficando
 qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
@@ -699,6 +687,7 @@ qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,30
 ```
 
 ### Correlación entre áreas de conocimiento
+
 ```{r c_puntajes}
 
 nuevo_df_5 <- data[, c("PUNT_LECTURA_CRITICA", "PUNT_MATEMATICAS", "PUNT_C_NATURALES","PUNT_SOCIALES_CIUDADANAS","PUNT_INGLES")]
@@ -725,3 +714,4 @@ ggplot(data = reshape2::melt(matriz_correlacion)) +
 ```
 
 ## Conclusiones
+
