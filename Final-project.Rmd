@@ -36,7 +36,7 @@ Para reproducir el código y los resultados a lo largo de este proyecto, fue nec
 - **reshape2**: Usada para reorganizar y transformar datos.
 - **tidyr**: Usada para ajustar la estructura de los datos para análisis.
 
-``` {r packages, eval= TRUE}
+``` {r packages_false, echo=TRUE, eval=FALSE}
 library(knitr)
 library(DT)
 library(ggplot2) 
@@ -47,6 +47,21 @@ library(tmap)
 library(reshape2)
 library(tidyr)
 ```
+
+```{r packages_true, echo=FALSE, eval=TRUE}
+library(knitr)
+library(DT)
+library(ggplot2)
+suppressPackageStartupMessages(library(dplyr))
+#library(sf)
+library(dplyr)
+#library(tmap)
+library(reshape2)
+suppressPackageStartupMessages(library(tidyr))
+```
+
+
+
     
 
 ## Preparación de datos {.tabset .tabset-fade}
@@ -313,7 +328,7 @@ data$ESTU_TIPOREMUNERACION <- as.numeric(data$ESTU_TIPOREMUNERACION)
 
 Después de la conversión, creé un nuevo dataframe que incluye estas variables numéricas junto con otras variables relevantes como puntajes globales, desempeño en inglés, lectura crítica, matemáticas, ciencias y sociales. Además, se verifico y corrijo la presencia de valores perdidos (NA) en el nuevo dataframe, eliminándolos para garantizar una análisis robusto.
 
-```{r cor_matrix}
+```{r cor_matrix, fig.align='center'}
 matrix_df <- data[, c("FAMI_ESTRATOVIVIENDA", "ESTU_DEDICACIONLECTURADIARIA", "ESTU_HORASSEMANATRABAJA", "FAMI_EDUCACIONMADRE", "FAMI_EDUCACIONPADRE", "FAMI_NUMLIBROS", "ESTU_DEDICACIONINTERNET",  "ESTU_NSE_INDIVIDUAL", "ESTU_TIPOREMUNERACION","PUNT_GLOBAL", "PUNT_INGLES", "DESEMP_LECTURA_CRITICA", "DESEMP_MATEMATICAS", "DESEMP_C_NATURALES", "DESEMP_SOCIALES_CIUDADANAS")]
 
 sum(is.na(matrix_df)) # Contar los NA
@@ -355,7 +370,7 @@ print(paste("La correlación entre NSE e PUNT_GLOBAL es:", round(correlation_val
 ```
  Seguido de esto procedemos a realizar un histograma entre las dos variables, para analizar tendencias a partir del mismo: 
  
-```{r c_des_nse_2}
+```{r c_des_nse_2, fig.align='center'}
 # Gráfico combinado con líneas de densidad ajustadas por clase socioeconómica
 ggplot(data, aes(x = PUNT_GLOBAL, fill = as.factor(ESTU_NSE_INDIVIDUAL))) +
   geom_density(alpha = 0.6, adjust = 1) +
@@ -373,7 +388,7 @@ Analizamos si el tipo de colegio (público/privado, bilingüe/no bilingüe) se c
 
 ¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
 
-```{r c_des_tc}
+```{r c_des_tc, fig.align='center'}
 # Calcular el promedio de puntajes por tipo de colegio
 promedios <- data %>%
   group_by(COLE_NATURALEZA) %>%
@@ -408,7 +423,7 @@ ggplot(stacked_data, aes(x = COLE_NATURALEZA, y = Promedio, fill = Area)) +
 
 ¿Los hijos de padres con niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
 
-```{r c_des_ne}
+```{r c_des_ne, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
 matrix_df$educacion_padre <- factor(matrix_df$educacion_padre, levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
                                    labels = c("Ninguno", "Primaria incompleta", "Primaria completa", "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa", "Técnica o tecnológica incompleta", "Técnica o tecnológica completa", "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
@@ -444,7 +459,7 @@ ggplot(combined_df, aes(x = nivel_educacion, y = punt_global, fill = tipo_educac
 
 #### Computador
 
-```{r cor_tienepc_punt}
+```{r cor_tienepc_punt, fig.align='center'}
 # Crear un nuevo dataframe con un índice para representar a los estudiantes
 data$indice <- seq_along(data$PUNT_GLOBAL)
 
@@ -480,7 +495,7 @@ cat("La correlación entre no tener computador y el puntaje es:", correlacion_si
 
 #### Internet
 
-```{r c_internet_des}
+```{r c_internet_des, fig.align='center'}
 # Crear un nuevo dataframe con un índice para representar a los estudiantes
 data$indice <- seq_along(data$PUNT_GLOBAL)
 
@@ -518,7 +533,7 @@ cat("La correlación entre no tener Internet y el puntaje es:", correlacion_sin)
 ### Uso de tiempo {.tabset}
 
 #### Tiempo dedicado a Internet
-```{r c_des_dint}
+```{r c_des_dint, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
 matrix_df$dedicacion_internet <- factor(matrix_df$dedicacion_internet, levels = c(1, 2, 3, 4),
                                    labels = c("No Navega Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
@@ -543,7 +558,7 @@ cat("La correlación entre el tiempo dedicado a Internet y el puntaje es:", corr
 
 ¿Hay alguna relación entre el tiempo dedicado a leer y sus puntajes? 
 
-```{r c_des_dlec}
+```{r c_des_dlec, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
 matrix_df$lectura_diaria <- factor(matrix_df$lectura_diaria, levels = c(1, 2, 3, 4, 5),
                                    labels = c("No leo por entretenimiento", "30 minutos o menos",
@@ -567,7 +582,7 @@ cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlac
 ```
 
 #### Tiempo dedicado a trabajar
-```{r c_des_dtrab}
+```{r c_des_dtrab, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
 matrix_df$horas_trabajo <- factor(matrix_df$horas_trabajo, levels = c(1, 2, 3, 4, 5),
                                    labels = c("0", "Menos de 10 horas", "Entre 11 y 20 horas", "Entre 21 y 30 horas", "Más de 30 horas"))
@@ -592,7 +607,7 @@ Se hace un nuevo dataframe filtrando por los estudiantes que trabajan y a este n
 se le agrega una nueva columna 'Tipo_Remuneracion_Agrupado donde se agrupan los
 que reciben paga en efectivo, especie o ambas, el otro valor en esta columna es 'No'
 
-```{r c_des_dtrab_2}
+```{r c_des_dtrab_2, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes para tipo de remuneración
 matrix_df$tipo_remuneracion <- factor(matrix_df$tipo_remuneracion, levels = c(1, 2, 3, 4),
                                    labels = c("No", "Si, en efectivo", "Si, en efectivo y especie", "Si, en especie"))
@@ -625,7 +640,7 @@ JOIN entre el mapa y los puntajes.
 graficación.
 
 #### Promedio de notas en deptos y municipio
-```{r Promedio de notas en los departamentos de Colombia y municipios de Santander}
+```{r Promedio de notas en los departamentos de Colombia y municipios de Santander, fig.align='center'}
 ## Cargando el mapa respectivo
 map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
 map2 <- map[,1] # Solo el mapa en terminos de su codigo
@@ -670,7 +685,7 @@ qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220
 ```
 
 #### Comparacion zonas urbanas y rurales 
-```{r Mapeo de promedio de colegios en zona urbana y rural}
+```{r Mapeo de promedio de colegios en zona urbana y rural, fig.align='center'}
 ## Separando datos Urbano/Rural
 dataUrbano <- data[data$COLE_AREA_UBICACION=="URBANO",]
 dataRural <- data[data$COLE_AREA_UBICACION=="RURAL",]
