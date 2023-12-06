@@ -40,11 +40,10 @@ Para reproducir el código y los resultados a lo largo de este proyecto, fue nec
 ``` {r packages_false, echo=TRUE, eval=FALSE}
 library(knitr)
 library(DT)
-library(ggplot2) 
-library(dplyr)
-library(sf) 
-library(dplyr) 
-library(tmap) 
+library(ggplot2) # visualizing data
+library(sf) # trabajar con tipos de datos geográficos
+library(dplyr) # realizar JOIN
+library(tmap) # graficar mapas
 library(reshape2)
 library(tidyr)
 library(gridExtra)
@@ -342,11 +341,15 @@ correlation_matrix <- cor(matrix_df)
 
 # Generar el gráfico sin valores de correlación
 corrplot::corrplot(correlation_matrix, type = "lower", tl.cex=0.7)
+
+horas_trabajo.ejecutado <- FALSE
+lectura_diaria.ejecutado <- FALSE
+dedicacion_internet.ejecutado <- FALSE
 ```
 
 #### Qué se observa
 
-Basándonos en la matriz de correlación, podemos concluir que las siguientes variables están correlacionadas entre sí:
+Basándonos en la matriz de correlación, podemos inferir que las siguientes variables están correlacionadas entre sí:
 
 * Puntaje global y desempeño en las materias: se puede evidenciar una fuerte correlación entre las materias; siendo más fuerte y positiva entre el desempeño de lectura, ciencias y sociales, así como entre matemáticas e inglés.
 
@@ -491,8 +494,8 @@ cat("La correlación entre tipo de colegio no bilingüe y el puntaje es:", corre
 correlation_padre <- cor(matrix_df$educacion_padre, matrix_df$punt_global)
 correlation_madre <- cor(matrix_df$educacion_madre, matrix_df$punt_global)
 
-
 # Mapear los valores numéricos a sus etiquetas correspondientes
+
 matrix_df$educacion_padre <- factor(matrix_df$educacion_padre, levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
                                    labels = c("Ninguno", "Primaria incompleta", "Primaria completa", "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa", "Técnica o tecnológica incompleta", "Técnica o tecnológica completa", "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
 
@@ -610,10 +613,27 @@ cat("La correlación entre no tener Internet y el puntaje es:", correlacion_sin_
 ### Uso de tiempo {.tabset}
 
 #### Tiempo dedicado a Internet
+¿El tiempo que pasan los jovenes en internet afecta a su puntaje en las pruebas ICFES?
+
+Para abordar esta pregunta, es conveniente tratar los datos como factores para agregar 
+jerarquía o niveles a los mismos. Esto da cierta facilidad a la hora de graficar 
+los valores y, tiene un mejor comportamiento, puesto que los datos ya están ordenados por 
+niveles sin necesidad de realizar una operación de ordenamiento. Para realizar esta 
+conversión, se necesita pasar por un condicional que valide si la operacion ya se hizo (de 
+no hacerse esta condición, al ejecutar el código mas de dos veces, se generan errores con 
+los factores y son reemplazados por "NaN"). si la conversión no se ha realizado, se realiza 
+dentro del condicional cambiando los valores numéricos por factores.<br>
+Posterior a esto, se hace la gráfica de "dedicacion_internet" vs "punt_global" con la 
+función geom_boxplot de ggplot. <br>
+Por último, se hace el cálculo de la correlación entre el puntaje y la dedicación a internet.
 ```{r c_des_dint, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
-matrix_df$dedicacion_internet <- factor(matrix_df$dedicacion_internet, levels = c(1, 2, 3, 4),
+if (dedicacion_internet.ejecutado == FALSE) {
+  matrix_df$dedicacion_internet <- factor(matrix_df$dedicacion_internet, levels = c(1, 2, 3, 4),
                                    labels = c("No navega en Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
+  
+  dedicacion_internet.ejecutado = TRUE
+}
 
 # Crear el gráfico de caja
 ggplot(matrix_df, aes(x = dedicacion_internet, y = punt_global)) +
@@ -635,12 +655,22 @@ cat("La correlación entre el tiempo dedicado a Internet y el puntaje es:", corr
 
 ¿Hay alguna relación entre el tiempo dedicado a leer y sus puntajes? 
 
+Una vez respondida la pregunta anterior, esta se torna más sencilla, ya que sigue los mismo pasos.<br>
+Se realiza una condición para no sobrescribir los valores si ya fueron cambiados.  Si la conversión aún no se ha realizado,
+se ingresa al condicional y se convierten los valores numéricos a factores. <br>
+Se grafica la relación entre 'lectura_diaria' y 'punt_global'.<br>
+Luego, se calcula e imprime el coeficiente de correlación de ambas variables.
 ```{r c_des_dlec, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
-matrix_df$lectura_diaria <- factor(matrix_df$lectura_diaria, levels = c(1, 2, 3, 4, 5),
+if (lectura_diaria.ejecutado == FALSE) {
+  matrix_df$lectura_diaria <- factor(matrix_df$lectura_diaria, levels = c(1, 2, 3, 4, 5),
                                    labels = c("No leo por entretenimiento", "30 minutos o menos",
                                               "Entre 1 y 2 horas", "Entre 30 y 60 minutos",
                                               "Más de 2 horas"))
+  lectura_diaria.ejecutado = TRUE
+}
+
+
 
 # Crear el gráfico de caja
 ggplot(matrix_df, aes(x = lectura_diaria, y = punt_global)) +
@@ -660,10 +690,20 @@ cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlac
 ```
 
 #### Tiempo dedicado a trabajar
+¿Tener un trabajo afecta en los puntajes obtenidos en la prueba?
+
+Esta pregunta comparte procedimiento con el análisis de las preguntas anteriores: <br>
+se hace la conversión a factor de los valores guardados en la columna 'horas_trabajo.<br>
+Se crea la gráfica teniendo de base las horas de trabajo y el puntaje global (como X y Y) de matrix_df.<br>
+Finalmente, se halla el coeficiente de correlación.
+
 ```{r c_des_dtrab, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
-matrix_df$horas_trabajo <- factor(matrix_df$horas_trabajo, levels = c(1, 2, 3, 4, 5),
+if (horas_trabajo.ejecutado == FALSE) {
+  matrix_df$horas_trabajo <- factor(matrix_df$horas_trabajo, levels = c(1, 2, 3, 4, 5),
                                    labels = c("0", "Menos de 10 horas", "Entre 11 y 20 horas", "Entre 21 y 30 horas", "Más de 30 horas"))
+  horas_trabajo.ejecutado = TRUE
+}
 
 # Crear el gráfico de caja
 ggplot(matrix_df, aes(x = horas_trabajo, y = punt_global)) +
@@ -680,10 +720,10 @@ correlacion <- cor(matrix_df$punt_global, as.numeric(matrix_df$horas_trabajo))
 cat("La correlación entre el tiempo dedicado a trabajar en la semana y el puntaje es:", correlacion)
 
 ```
-Lo siguiente muestra si los estudiantes que dijeron que trabajaban reciben pago o no.
-Se hace un nuevo dataframe filtrando por los estudiantes que trabajan y a este nuevo dataframe
-se le agrega una nueva columna 'Tipo_Remuneracion_Agrupado donde se agrupan los
-que reciben paga en efectivo, especie o ambas, el otro valor en esta columna es 'No'
+Lo siguiente muestra si los estudiantes que dijeron que trabajaban reciben pago o no.<br>
+Se crea un nuevo dataframe filtrando por los estudiantes que trabajan y, a este nuevo dataframe,
+se le agrega una nueva columna 'Tipo_Remuneracion_Agrupado' donde se agrupan aquellos
+que reciben pago en efectivo, especie o ambas; el otro valor en esta columna es 'No'.
 
 ```{r c_des_dtrab_2, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes para tipo de remuneración
@@ -710,59 +750,68 @@ ggplot(trabajo_mas_20_horas, aes(x = Tipo_Remuneracion_Agrupado)) +
 
 ### Análisis demografico {.tabset}
 
-Para este análisis, correspondiente a el mapeo de los promedios de puntajes por departamentos y municipios, se lleva a cabo:
-La carga de los mapas corresponientes a departamentos y municipios.
-Separación de datos y cálculo de media del puntaje por departamento o municipio respectivamente.
-arreglo de datos, eliminando casos especiales y cambiando nombres de columnas y tipos de datos.
-JOIN entre el mapa y los puntajes.
-graficación.
-
 #### Promedio de notas en deptos y municipio
+1. ¿Hay diferencia entre la media de puntajes obtenidos en distintos departamentos de Colombia?<br>
+2. ¿Qué tanta diferencia hay entre municipios de Santander?<br>
+
+Para este análisis, correspondiente al mapeo de los promedios de puntajes por departamentos y municipios, se lleva a cabo: <br>
+Cargar los mapas corresponientes a departamentos y municipios. <br>
+Separar los datos y calcular la media del puntaje por departamento o municipio respectivamente.<br>
+Arreglar datos, eliminando casos especiales y cambiando nombres de columnas y tipos de datos.<br>
+JOIN entre el mapa y los puntajes.<br>
+Graficación.
+
 ```{r Promedio de notas en los departamentos de Colombia y municipios de Santander, fig.align='center'}
-## Cargando el mapa respectivo
-map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
-map2 <- map[,1] # Solo el mapa en terminos de su codigo
 
-## Separando y arreglando los datos de interes de "data"
-
-Puntaje.Depto<-aggregate(PUNT_GLOBAL~ESTU_COD_RESIDE_DEPTO, FUN = mean, data = data)
-
-Puntaje.Depto=Puntaje.Depto[-34,]
-colnames(Puntaje.Depto) <- c('DPTO_CCDGO','PUNTAJE')
-
-map2$DPTO_CCDGO <- as.numeric(map2$DPTO_CCDGO)
-
-## Uniendo tablas
-mapJoin <- left_join(map2, Puntaje.Depto)
-
-## Graficando
-qtm(mapJoin,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
-
-#MUNICIPIOS
+library(sf) # trabajar con tipos de datos geográficos
+library(dplyr) # realizar JOIN
+library(tmap) # graficar mapas
 
 ## Cargando el mapa respectivo
-map <- st_read("MGN2022_MPIO_POLITICO/MGN_MPIO_POLITICO.shp")
-map2 <- map[,1,3] # Solo el mapa en terminos de su codigo
-#plot(map2)
+map_departamentos <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
+map_municipios <- st_read("MGN2022_MPIO_POLITICO/MGN_MPIO_POLITICO.shp")
 
-## Separando y arreglando los datos de interes de "data"
-Puntaje.MPIO<-aggregate(PUNT_GLOBAL~ESTU_COD_RESIDE_MCPIO, FUN = mean, data = data)
+## Separando y arreglando los datos de interés de "data"
+Puntaje.Depto <- aggregate(PUNT_GLOBAL ~ ESTU_COD_RESIDE_DEPTO, FUN = mean, data = data)
+Puntaje.Depto <- Puntaje.Depto[-34,]
+colnames(Puntaje.Depto) <- c('DPTO_CCDGO', 'PUNTAJE')
 
-Puntaje.MPIO=Puntaje.MPIO[-1118,]
-colnames(Puntaje.MPIO) <- c('MPIO_CDPMP','PUNTAJE')
+Puntaje.MPIO <- aggregate(PUNT_GLOBAL ~ ESTU_COD_RESIDE_MCPIO, FUN = mean, data = data)
+Puntaje.MPIO <- Puntaje.MPIO[-1118,]
+colnames(Puntaje.MPIO) <- c('MPIO_CDPMP', 'PUNTAJE')
 
-colnames(map2) <- c('MCPIO_CCDGO','geometry')
-Puntaje.MPIO$MPIO_CDPMP <- as.character(Puntaje.MPIO$MPIO_CDPMP)
-
+map_departamentos$DPTO_CCDGO <- as.numeric(map_departamentos$DPTO_CCDGO)
+map_municipios$MPIO_CDPMP <- as.numeric(map_municipios$MPIO_CDPMP)
 ## Uniendo tablas
-mapJoin <- left_join(map, Puntaje.MPIO)
+mapJoin_Depto <- left_join(map_departamentos, Puntaje.Depto)
+mapJoin_MPIO <- left_join(map_municipios, Puntaje.MPIO)
 
 ## Graficando
 tmap_options(check.and.fix = TRUE)
-qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+
+plot_Colombia <- tm_layout(title = "Promedio de puntajes en Colombia", title.position = c("center", "top"), title.size = 1.0, legend.text.size = 0.65) +
+  qtm(mapJoin_Depto,"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
+
+plot_Santander <- tm_layout(title = "Promedio de puntajes en Santander", title.position = c("center", "top"), title.size = 1.0, legend.show = FALSE) +
+  qtm(mapJoin_MPIO[mapJoin_MPIO$DPTO_CCDGO=="68",],"PUNTAJE", fill.breaks = c(0, 200, 210, 220, 230, 240, 250, 260, 270, 280, 300), fill.palette = c("red", "yellow", "green"))
+
+tmap_arrange(plot_Colombia, plot_Santander, ncol = 2)
+
+Media_Puntajes <- mean(data$PUNT_GLOBAL)
+
+cat("Para mayor comprensión, la media de puntajes de las pruebas ICFES a nivel nacional es de:", Media_Puntajes)
+ 
 ```
 
 #### Comparacion zonas urbanas y rurales 
+¿Existe diferencia entre la educación en zonas urbanas y la educación en zonas rurales?
+
+Siguiendo el procedimiento de la pregunta anterior, este análisis consiste en: <br>
+Separar los datos de los estudiantes en dos conjuntos según la zona (urbano y rural). <br>
+Eliminar los datos no relevantes para la pregunta y conservar únicamente el departamento y la media del puntaje para cada conjunto de estudiantes.<br>
+Realizar el JOIN. <br>
+Generar gráficos.
+
 ```{r Mapeo de promedio de colegios en zona urbana y rural, fig.align='center'}
 ## Separando datos Urbano/Rural
 dataUrbano <- data[data$COLE_AREA_UBICACION=="URBANO",]
@@ -776,19 +825,24 @@ Puntaje.Urbano=Puntaje.Urbano[-34,]
 colnames(Puntaje.Urbano) <- c('DPTO_CCDGO','PUNTAJE')
 colnames(Puntaje.Rural) <- c('DPTO_CCDGO','PUNTAJE')
 
-map <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
-map2 <- map[,1] # Solo el mapa en terminos de su codigo
-map2$DPTO_CCDGO <- as.numeric(map2$DPTO_CCDGO)
-
 ## Uniendo tablas
-mapJoinUrbano <- left_join(map2, Puntaje.Urbano)
-mapJoinRural <- left_join(map2, Puntaje.Rural)
+mapJoinUrbano <- left_join(map_departamentos, Puntaje.Urbano)
+mapJoinRural <- left_join(map_departamentos, Puntaje.Rural)
 
 ## Graficando
-qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
-qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+plot_Urbano <- tm_layout(title = "Promedio de puntajes en zonas Urbanas", title.position = c("center", "top"), title.size = 1.0, legend.text.size = 0.65) +
+  qtm(mapJoinUrbano,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,280), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+plot_Rural <- tm_layout(title = "Promedio de puntajes en zonas Rurales", title.position = c("center", "top"), title.size = 1.0, legend.show = FALSE) +
+  qtm(mapJoinRural,"PUNTAJE", fill.breaks = c(0,200,210,220,230,240,250,260,270,300), fill.palette = c("red", "yellow", "green")) # Para todo el pais
+
+tmap_arrange(plot_Urbano, plot_Rural, ncol = 2)
+
 ```
+
+
 ## Conclusiones
 ## Referencias
+- ICFES (2023). DataIcfes. Saber 11. https://www.icfes.gov.co/web/guest/data-icfes
 - Auguié, B. (2019, July 13). Laying out multiple plots on a page. https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html
 - Holtz, Y. (n.d.). An overview of color names in R. https://r-graph-gallery.com/42-colors-names.html
+- DANE.gov.co (2023, April 3).  Descargas MGN 2022. Geoportal DANE.https://geoportal.dane.gov.co/descargas/mgn_2022/
