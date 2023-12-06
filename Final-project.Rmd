@@ -610,8 +610,9 @@ cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlac
 
 ```
 
-### Análisis demografico
+### Análisis demografico {.tabset}
 
+#### Promedio de notas en deptos y municipio
 Para este análisis, correspondiente a el mapeo de los promedios de puntajes por departamentos y municipios, se lleva a cabo:
 La carga de los mapas corresponientes a departamentos y municipios.
 Separación de datos y cálculo de media del puntaje por departamento o municipio respectivamente.
@@ -668,6 +669,8 @@ qtm(mapJoin[mapJoin$DPTO_CCDGO =="68",],"PUNTAJE", fill.breaks = c(0,200,210,220
 
 ```
 
+#### Comparacion zonas urbanas y rurales 
+
 ```{r Mapeo de promedio de colegios en zona urbana y rural}
 ## Separando datos Urbano/Rural
 dataUrbano <- data[data$COLE_AREA_UBICACION=="URBANO",]
@@ -720,3 +723,5 @@ ggplot(data = reshape2::melt(matriz_correlacion)) +
   theme_minimal() +
   labs(title = "Matriz de correlación")
 ```
+
+## Conclusiones
