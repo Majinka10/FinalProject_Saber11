@@ -340,6 +340,10 @@ correlation_matrix <- cor(matrix_df)
 
 # Generar el gráfico sin valores de correlación
 corrplot::corrplot(correlation_matrix, type = "lower", tl.cex=0.7)
+
+horas_trabajo.ejecutado <- FALSE
+lectura_diaria.ejecutado <- FALSE
+dedicacion_internet.ejecutado <- FALSE
 ```
 
 #### Qué se observa
@@ -448,8 +452,8 @@ cat("La correlación entre tipo de colegio público y el puntaje es:", correlaci
 correlation_padre <- cor(matrix_df$educacion_padre, matrix_df$punt_global)
 correlation_madre <- cor(matrix_df$educacion_madre, matrix_df$punt_global)
 
-
 # Mapear los valores numéricos a sus etiquetas correspondientes
+
 matrix_df$educacion_padre <- factor(matrix_df$educacion_padre, levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
                                    labels = c("Ninguno", "Primaria incompleta", "Primaria completa", "Secundaria (Bachillerato) incompleta", "Secundaria (Bachillerato) completa", "Técnica o tecnológica incompleta", "Técnica o tecnológica completa", "Educación profesional incompleta", "Educación profesional completa", "Postgrado"))
 
@@ -569,8 +573,12 @@ cat("La correlación entre no tener Internet y el puntaje es:", correlacion_sin_
 #### Tiempo dedicado a Internet
 ```{r c_des_dint, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
-matrix_df$dedicacion_internet <- factor(matrix_df$dedicacion_internet, levels = c(1, 2, 3, 4),
+if (dedicacion_internet.ejecutado == FALSE) {
+  matrix_df$dedicacion_internet <- factor(matrix_df$dedicacion_internet, levels = c(1, 2, 3, 4),
                                    labels = c("No Navega Internet", "30 minutos o menos", "Entre 1 y 3 horas", "Más de 3 horas"))
+  
+  dedicacion_internet.ejecutado = TRUE
+}
 
 # Crear el gráfico de caja
 ggplot(matrix_df, aes(x = dedicacion_internet, y = punt_global)) +
@@ -594,10 +602,15 @@ cat("La correlación entre el tiempo dedicado a Internet y el puntaje es:", corr
 
 ```{r c_des_dlec, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
-matrix_df$lectura_diaria <- factor(matrix_df$lectura_diaria, levels = c(1, 2, 3, 4, 5),
+if (lectura_diaria.ejecutado == FALSE) {
+  matrix_df$lectura_diaria <- factor(matrix_df$lectura_diaria, levels = c(1, 2, 3, 4, 5),
                                    labels = c("No leo por entretenimiento", "30 minutos o menos",
                                               "Entre 1 y 2 horas", "Entre 30 y 60 minutos",
                                               "Más de 2 horas"))
+  lectura_diaria.ejecutado = TRUE
+}
+
+
 
 # Crear el gráfico de caja
 ggplot(matrix_df, aes(x = lectura_diaria, y = punt_global)) +
@@ -617,10 +630,20 @@ cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlac
 ```
 
 #### Tiempo dedicado a trabajar
+¿Tener un trabajo afecta en los puntajes obtenidos en la prueba?
+
+Una vez respondida la anterior pregunta, esta se torna mas sencilla, puesto que sigue los mismo pasos.
+Se deben asignar las etiquetas correspondientes a los valores numéricos guardados en "matrix_df".
+Se crea la gráfica teniendo de base las horas de trabajo y el puntaje global (como X y Y) de matrix_df.
+
+
 ```{r c_des_dtrab, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
-matrix_df$horas_trabajo <- factor(matrix_df$horas_trabajo, levels = c(1, 2, 3, 4, 5),
+if (horas_trabajo.ejecutado == FALSE) {
+  matrix_df$horas_trabajo <- factor(matrix_df$horas_trabajo, levels = c(1, 2, 3, 4, 5),
                                    labels = c("0", "Menos de 10 horas", "Entre 11 y 20 horas", "Entre 21 y 30 horas", "Más de 30 horas"))
+  horas_trabajo.ejecutado = TRUE
+}
 
 # Crear el gráfico de caja
 ggplot(matrix_df, aes(x = horas_trabajo, y = punt_global)) +
@@ -639,7 +662,7 @@ cat("La correlación entre el tiempo dedicado a trabajar en la semana y el punta
 ```
 Lo siguiente muestra si los estudiantes que dijeron que trabajaban reciben pago o no.
 Se hace un nuevo dataframe filtrando por los estudiantes que trabajan y a este nuevo dataframe
-se le agrega una nueva columna 'Tipo_Remuneracion_Agrupado donde se agrupan los
+se le agrega una nueva columna 'Tipo_Remuneracion_Agrupado' donde se agrupan los
 que reciben paga en efectivo, especie o ambas, el otro valor en esta columna es 'No'
 
 ```{r c_des_dtrab_2, fig.align='center'}
