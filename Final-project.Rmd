@@ -631,12 +631,15 @@ de cerrar estas brechas para una educación equitativa.
 
 Aunque tener acceso a estos recursos puede impactar positivamente, el tiempo
 que se dedica a estos recursos de manera no adecuada puede ser contraproducente,
-pero para no hacer suposiciones decidimos comprobarlo en el siguiente análisis.
+pero para no hacer suposiciones decidimos comprobarlo en el análisis de uso de tiempo.
 
 ### Uso de tiempo {.tabset}
 
 #### Tiempo dedicado a Internet
-¿El tiempo que pasan los jovenes en internet afecta a su puntaje en las pruebas ICFES?
+
+Analizamos si el tiempo dedicado a Internet, excluyendo actividades académicas,
+se relaciona con el puntaje obtenido. Intentando responder la siguiente pregunta: ¿El tiempo que pasan los jovenes en internet afecta a su puntaje en las pruebas ICFES? 
+Y partiendo de la suposición que más tiempo en línea implicaría peores resultados.
 
 Para abordar esta pregunta, es conveniente tratar los datos como factores para agregar 
 jerarquía o niveles a los mismos. Esto da cierta facilidad a la hora de graficar 
@@ -645,10 +648,13 @@ niveles sin necesidad de realizar una operación de ordenamiento. Para realizar 
 conversión, se necesita pasar por un condicional que valide si la operacion ya se hizo (de 
 no hacerse esta condición, al ejecutar el código mas de dos veces, se generan errores con 
 los factores y son reemplazados por "NaN"). si la conversión no se ha realizado, se realiza 
-dentro del condicional cambiando los valores numéricos por factores.<br>
+dentro del condicional cambiando los valores numéricos por factores.
+
 Posterior a esto, se hace la gráfica de "dedicacion_internet" vs "punt_global" con la 
-función geom_boxplot de ggplot. <br>
+función geom_boxplot de ggplot. 
+
 Por último, se hace el cálculo de la correlación entre el puntaje y la dedicación a internet.
+
 ```{r c_des_dint, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
 if (dedicacion_internet.ejecutado == FALSE) {
@@ -665,14 +671,22 @@ ggplot(matrix_df, aes(x = dedicacion_internet, y = punt_global)) +
        x = "Tiempo en Internet",
        y = "Puntaje global") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas x si es necesario
+```
+
+La dedicación a Internet, sorprendentemente, parece correlacionarse positivamente con los puntajes obtenidos en las pruebas, contradiciendo la suposición de que más tiempo en línea implicaría peores resultados. Los estudiantes con más horas en Internet promedian puntajes superiores a 250, mientras que aquellos que no navegan rondan los 210.
+
+```{r c_des_dint_2, fig.align='center'}
 
 # Calcular correlación entre puntajes y tener computadora
 correlacion <- cor(matrix_df$punt_global, as.numeric(matrix_df$dedicacion_internet))
 
 # Mostrar la correlación
 cat("La correlación entre el tiempo dedicado a Internet y el puntaje es:", correlacion)
-
 ```
+
+Esta correlación positiva sugiere que hay una relación moderada entre el tiempo dedicado a Internet y los puntajes obtenidos en las pruebas. Mientras más tiempo pasan los estudiantes en línea, tienden a obtener puntajes más altos. Sin embargo, la correlación no implica causalidad y otros factores podrían influir en estos resultados. 
+
+Además, podría reflejar una brecha digital: aquellos que no navegan en Internet tienen puntajes más bajos, lo que se vincula con las diferencias socioeconómicas y de acceso a recursos.
 
 #### Tiempo dedicado a leer 
 
@@ -724,10 +738,10 @@ Si bien la diferencia entre algunos niveles y sus niveles posteriores no es muy 
 #### Tiempo dedicado a trabajar
 ¿Tener un trabajo afecta en los puntajes obtenidos en la prueba?
 
-Esta pregunta comparte procedimiento con el análisis de las preguntas anteriores: <br>
-se hace la conversión a factor de los valores guardados en la columna 'horas_trabajo.<br>
-Se crea la gráfica teniendo de base las horas de trabajo y el puntaje global (como X y Y) de matrix_df.<br>
-Finalmente, se halla el coeficiente de correlación.
+Esta pregunta comparte procedimiento con el análisis de las preguntas anteriores:
+- se hace la conversión a factor de los valores guardados en la columna 'horas_trabajo.
+- Se crea la gráfica teniendo de base las horas de trabajo y el puntaje global (como X y Y) de matrix_df.
+- Finalmente, se halla el coeficiente de correlación.
 
 ```{r c_des_dtrab, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
