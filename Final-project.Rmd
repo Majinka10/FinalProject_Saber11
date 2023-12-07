@@ -476,7 +476,9 @@ analizan más adelante.
 
 #### Nivel educativo de los padres
 
-¿Los hijos de padres con niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
+Analizamos si el nivel educativo de los padres se relaciona con el desempeño
+académico, intentando responder la siguiente pregunta: ¿Los hijos de padres con
+niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
 
 ```{r c_des_ne, fig.align='center'}
 # Calcular correlación entre las dos variables antes de cambiar los datos a factores
@@ -509,63 +511,78 @@ ggplot(combined_df, aes(x = nivel_educacion, y = punt_global, fill = tipo_educac
        x = "Nivel de educación",
        y = "Puntaje global") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas x si es necesario
+```
 
+Se observa un hallazgo impactante: a medida que los padres alcanzan un nivel educativo
+más alto, se evidencia un notable incremento en los puntajes promedio obtenidos por
+sus hijos. En particular, se observa una marcada brecha entre los hijos de padres con
+estudios de posgrado, cuya media supera los 330, y aquellos cuyos padres tienen nivel
+educativo nulo o primario, con puntajes que no superan los 250.
+
+```{r c_des_ne_2}
 # Imprimir el valor de correlación del padre y madre
 print(paste("La correlación entre el nivel educativo del padre y el puntaje es:", round(correlation_padre, 3)))
 print(paste("La correlación entre el nivel educativo de la madre y el puntaje es:", round(correlation_madre, 3)))
 ```
 
+Esto se ratifica con una correlación positiva considerable entre el nivel educativo
+de los padres y el desempeño académico de sus hijos, sugiriendo así que un entorno
+educativo favorable puede influir de manera significativa en los logros académicos.
+
+A su vez, el nivel educativo de los padres podría incidir en la calidad de la
+enseñanza impartida a sus hijos y en la relevancia que se le otorga a la educación,
+ejerciendo un efecto directo en su rendimiento académico. E incluso, podría reflejar
+desigualdades en el acceso a recursos que apoyen el proceso educativo, tema estudiado
+más adelante.
+
 ### Acceso a recursos
 
 #### Computador e Internet
 
+Analizamos si el el acceso a recursos, específicamente, computador e Internet,
+se relaciona con el puntaje obtenido, itentando responder la siguiente pregunta:
+¿la disponibilidad de recursos en casa (computadora o Internet) se relaciona con
+el rendimiento académico? 
+
+Para poder responder esta pregunta, primero filtramos los datos, convirtiendo los 
+valores vacíos en las columnas de interés a NA y luego eliminadolos, después, creamos
+una nueva columna que irá en el nuevo dataframe la cual contiene "Sí" para aquellos
+estudiantes que tienen el recurso y "No" para los que no lo tienen. Luego convierte el valor en las columnas a 1 o 0 y calcula la correlación entre estos valores y los
+puntajes globales. Por último, se genera dos gráficos de caja, uno para los puntajes según el acceso a un computador y otro para los puntajes según el acceso a Internet. 
+
 ```{r cor_tienepc_punt}
-# Crear un nuevo dataframe con un índice para representar a los estudiantes
-data$indice <- seq_along(data$PUNT_GLOBAL)
-
-# Filtrar datos para quienes tienen y no tienen computadora
-con_computadora <- data[data$FAMI_TIENECOMPUTADOR == "Si", ]
-sin_computadora <- data[data$FAMI_TIENECOMPUTADOR == "No", ]
-
-# Unir ambos datasets
-combined_data_pc <- rbind(
-  data.frame(TieneComputadora = "Sí", PUNT_GLOBAL = con_computadora$PUNT_GLOBAL),
-  data.frame(TieneComputadora = "No", PUNT_GLOBAL = sin_computadora$PUNT_GLOBAL)
-)
+# Filtrar los datos y crear una nueva columna indicando si tiene computador
+data_pc <- data %>%
+  mutate(FAMI_TIENECOMPUTADOR = na_if(FAMI_TIENECOMPUTADOR, "")) %>%
+  filter(!is.na(FAMI_TIENECOMPUTADOR)) %>%
+  mutate(TieneComputador = ifelse(FAMI_TIENECOMPUTADOR == "Si", "Sí", "No")) %>%
+  select(TieneComputador, PUNT_GLOBAL)
 
 # Calcular correlación entre puntajes y tener computadora
-correlacion_con_pc <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENECOMPUTADOR == "Si"))
+correlacion_con_pc <- cor(data_pc$PUNT_GLOBAL, as.numeric(data_pc$TieneComputador == "Sí"))
 
 # Calcular correlación entre puntajes y tener computadora
-correlacion_sin_pc <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENECOMPUTADOR == "No"))
-
-
+correlacion_sin_pc <- cor(data_pc$PUNT_GLOBAL, as.numeric(data_pc$TieneComputador == "No"))
 ```
 
 ```{r cor_tieneint_punt}
-# Crear un nuevo dataframe con un índice para representar a los estudiantes
-data$indice <- seq_along(data$PUNT_GLOBAL)
+# Filtrar los datos y crear una nueva columna indicando si tiene Internet
+data_internet <- data %>%
+  mutate(FAMI_TIENEINTERNET = na_if(FAMI_TIENEINTERNET, "")) %>%
+  filter(!is.na(FAMI_TIENEINTERNET)) %>%
+  mutate(TieneInternet = ifelse(FAMI_TIENEINTERNET == "Si", "Sí", "No")) %>%
+  select(TieneInternet, PUNT_GLOBAL)
 
-# Filtrar datos para quienes tienen y no tienen internet
-con_computadora <- data[data$FAMI_TIENEINTERNET == "Si", ]
-sin_computadora <- data[data$FAMI_TIENEINTERNET == "No", ]
+# Calcular correlación entre puntajes y tener Internet
+correlacion_con_internet <- cor(data_internet$PUNT_GLOBAL, as.numeric(data_internet$TieneInternet == "Sí"))
 
-# Unir ambos datasets
-combined_data_internet <- rbind(
-  data.frame(TieneInternet = "Sí", PUNT_GLOBAL = con_computadora$PUNT_GLOBAL),
-  data.frame(TieneInternet = "No", PUNT_GLOBAL = sin_computadora$PUNT_GLOBAL)
-)
-
-# Calcular correlación entre puntajes y tener computadora
-correlacion_con_internet <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENEINTERNET == "Si"))
-
-# Calcular correlación entre puntajes y tener computadora
-correlacion_sin_internet <- cor(data$PUNT_GLOBAL, as.numeric(data$FAMI_TIENEINTERNET == "No"))
+# Calcular correlación entre puntajes y tener Internet
+correlacion_sin_internet <- cor(data_internet$PUNT_GLOBAL, as.numeric(data_internet$TieneInternet == "No"))
 ```
 
 ```{r c_internet_des, fig.align='center'}
 # Gráfico 1: Puntajes según el acceso a un computador
-plot_pc <- ggplot(combined_data_pc, aes(x = TieneComputadora, y = PUNT_GLOBAL, fill = TieneComputadora)) +
+plot_pc <- ggplot(data_pc, aes(x = TieneComputador, y = PUNT_GLOBAL, fill = TieneComputador)) +
   geom_boxplot() +
   labs(title = NULL,
        x = "Tiene computador",
@@ -574,7 +591,7 @@ plot_pc <- ggplot(combined_data_pc, aes(x = TieneComputadora, y = PUNT_GLOBAL, f
   guides(fill = FALSE)  # Ocultar la leyenda de color
 
 # Gráfico 2: Puntajes según el acceso a Internet
-plot_internet <- ggplot(combined_data_internet, aes(x = TieneInternet, y = PUNT_GLOBAL, fill = TieneInternet)) +
+plot_internet <- ggplot(data_internet, aes(x = TieneInternet, y = PUNT_GLOBAL, fill = TieneInternet)) +
   geom_boxplot() +
   labs(title = NULL,
        x = "Tiene Internet",
@@ -584,7 +601,19 @@ plot_internet <- ggplot(combined_data_internet, aes(x = TieneInternet, y = PUNT_
 
 # Organizar los gráficos en una sola ventana gráfica
 grid.arrange(plot_pc, plot_internet, ncol = 2, top = "Puntajes según acceso a un computador o Internet")
+```
 
+Efectivamente sí, tener acceso a un computador o Internet influye fuertemente en el
+puntaje obtenido, en el caso de tener un computador se observa que los estudiantes
+que no tienen acceso a este recurso obtuvieron una media inferior a 230 puntos,
+mientras que los que sí tenían obtuvieron una media superior a los 270 puntos, de
+igual manera con el acceso a Internet.
+
+Estos hallazgos destacan la influencia crucial del acceso a recursos tecnológicos
+en el rendimiento académico. La brecha entre aquellos con y sin acceso a computadoras
+e Internet es evidente, con puntajes significativamente diferentes.
+
+```{r c_internet_des_cor}
 # Mostrar la correlación
 cat("La correlación entre tener computador y el puntaje es:", correlacion_con_pc)
 
@@ -596,10 +625,22 @@ cat("La correlación entre tener Internet y el puntaje es:", correlacion_con_int
 cat("La correlación entre no tener Internet y el puntaje es:", correlacion_sin_internet)
 ```
 
+Las correlaciones subrayan esta relación: tener estos recursos correlaciona
+positivamente con puntajes más altos. Esto apunta a desigualdades socioeconómicas
+en el acceso a recursos, impactando la calidad educativa y evidenciando la importancia
+de cerrar estas brechas para una educación equitativa. 
+
+Aunque tener acceso a estos recursos puede impactar positivamente, el tiempo
+que se dedica a estos recursos de manera no adecuada puede ser contraproducente,
+pero para no hacer suposiciones decidimos comprobarlo en el análisis de uso de tiempo.
+
 ### Uso de tiempo {.tabset}
 
 #### Tiempo dedicado a Internet
-¿El tiempo que pasan los jovenes en internet afecta a su puntaje en las pruebas ICFES?
+
+Analizamos si el tiempo dedicado a Internet, excluyendo actividades académicas,
+se relaciona con el puntaje obtenido. Intentando responder la siguiente pregunta: ¿El tiempo que pasan los jovenes en internet afecta a su puntaje en las pruebas ICFES? 
+Y partiendo de la suposición que más tiempo en línea implicaría peores resultados.
 
 Para abordar esta pregunta, es conveniente tratar los datos como factores para agregar 
 jerarquía o niveles a los mismos. Esto da cierta facilidad a la hora de graficar 
@@ -608,10 +649,13 @@ niveles sin necesidad de realizar una operación de ordenamiento. Para realizar 
 conversión, se necesita pasar por un condicional que valide si la operacion ya se hizo (de 
 no hacerse esta condición, al ejecutar el código mas de dos veces, se generan errores con 
 los factores y son reemplazados por "NaN"). si la conversión no se ha realizado, se realiza 
-dentro del condicional cambiando los valores numéricos por factores.<br>
+dentro del condicional cambiando los valores numéricos por factores.
+
 Posterior a esto, se hace la gráfica de "dedicacion_internet" vs "punt_global" con la 
-función geom_boxplot de ggplot. <br>
+función geom_boxplot de ggplot. 
+
 Por último, se hace el cálculo de la correlación entre el puntaje y la dedicación a internet.
+
 ```{r c_des_dint, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
 if (dedicacion_internet.ejecutado == FALSE) {
@@ -628,14 +672,22 @@ ggplot(matrix_df, aes(x = dedicacion_internet, y = punt_global)) +
        x = "Tiempo en Internet",
        y = "Puntaje global") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas x si es necesario
+```
+
+La dedicación a Internet, sorprendentemente, parece correlacionarse positivamente con los puntajes obtenidos en las pruebas, contradiciendo la suposición de que más tiempo en línea implicaría peores resultados. Los estudiantes con más horas en Internet promedian puntajes superiores a 250, mientras que aquellos que no navegan rondan los 210.
+
+```{r c_des_dint_2, fig.align='center'}
 
 # Calcular correlación entre puntajes y tener computadora
 correlacion <- cor(matrix_df$punt_global, as.numeric(matrix_df$dedicacion_internet))
 
 # Mostrar la correlación
 cat("La correlación entre el tiempo dedicado a Internet y el puntaje es:", correlacion)
-
 ```
+
+Esta correlación positiva sugiere que hay una relación moderada entre el tiempo dedicado a Internet y los puntajes obtenidos en las pruebas. Mientras más tiempo pasan los estudiantes en línea, tienden a obtener puntajes más altos. Sin embargo, la correlación no implica causalidad y otros factores podrían influir en estos resultados. 
+
+Además, podría reflejar una brecha digital: aquellos que no navegan en Internet tienen puntajes más bajos, lo que se vincula con las diferencias socioeconómicas y de acceso a recursos.
 
 #### Tiempo dedicado a leer 
 
@@ -696,10 +748,10 @@ Si bien la diferencia entre algunos niveles y sus niveles posteriores no es muy 
 #### Tiempo dedicado a trabajar
 ¿Tener un trabajo afecta en los puntajes obtenidos en la prueba?
 
-Esta pregunta comparte procedimiento con el análisis de las preguntas anteriores: <br>
-se hace la conversión a factor de los valores guardados en la columna 'horas_trabajo.<br>
-Se crea la gráfica teniendo de base las horas de trabajo y el puntaje global (como X y Y) de matrix_df.<br>
-Finalmente, se halla el coeficiente de correlación.
+Esta pregunta comparte procedimiento con el análisis de las preguntas anteriores:
+- se hace la conversión a factor de los valores guardados en la columna 'horas_trabajo.
+- Se crea la gráfica teniendo de base las horas de trabajo y el puntaje global (como X y Y) de matrix_df.
+- Finalmente, se halla el coeficiente de correlación.
 
 ```{r c_des_dtrab, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
