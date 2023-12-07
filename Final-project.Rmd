@@ -20,8 +20,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introducción
 
-En el contexto educativo actual, comprender los factores que influyen en el rendimiento académico de los estudiantes es fundamental. Por ello, el objetivo de este proyecto es investigar y analizar en profundidad los determinantes detrás de los resultados obtenidos en las pruebas Saber 11. Para ello, se estudia un conjunto de datos que contiene información general distribuida en cuatro categorías principales: estudiante, familia, colegio y aspectos relacionados con la prueba. Los análisis se realizarán a través de Rstudio, utilizando técnicas estadísticas y demográficas como la correlación de variables para describir relaciones entre columnas, así como análisis de gráficos y un análisis espacial. Es importante señalar que el examen Saber 11 es un referente clave en la evaluación del sistema educativo colombiano. Por lo tanto, explorar los elementos que impactan sus resultados puede ofrecer valiosas perspectivas para mejorar el proceso educativo.
-
+1.1	Planteamiento del problema:
+En el contexto educativo actual, comprender los factores que influyen en el rendimiento académico de los estudiantes es fundamental. Por ello, el objetivo de este proyecto es investigar y analizar en profundidad los determinantes detrás de los resultados obtenidos en las pruebas Saber 11.
+1.2	¿Como se abordará el problema?
+Se estudia un conjunto de datos que contiene información general distribuida en cuatro categorías principales: estudiante, familia, colegio y aspectos relacionados con la prueba. Los análisis se realizan a través de Rstudio.
+1.3	Técnica analítica usada:
+Se usan técnicas estadísticas y demográficas como la correlación de variables para describir relaciones entre columnas, así como análisis de gráficos y un análisis espacial.
+1.4	Beneficio de nuestro análisis para el consumidor:
+Es importante señalar que el examen Saber 11 es un referente clave en la evaluación del sistema educativo colombiano. Por lo tanto, explorar los elementos que impactan sus resultados puede ofrecer valiosas perspectivas para mejorar el proceso educativo.
 
 ## Paquetes requeridos 
 
@@ -372,7 +378,7 @@ Se analiza la correlación entre varias variables, como el nivel socieconomico, 
 
 #### Nivel socioeconómico 
 
-Analizamos si existe una correlación entre el desempeño académico y el nivel socioeconómico del estudiante.
+Analizamos si existe una correlación entre el desempeño académico y el nivel socioeconómico del estudiante. 
 
 Para ello, lo primero que debemos hacer es crear un dataframe con las dos variables a analizar en este caso: "ESTU_NSE_INDIVIDUAL" y "PUNT_GLOBAL":
 
@@ -384,7 +390,8 @@ correlation_value <- cor(des_nse_df$ESTU_NSE_INDIVIDUAL, des_nse_df$PUNT_GLOBAL)
 # Imprimir el valor de correlación
 print(paste("La correlación entre NSE e PUNT_GLOBAL es:", round(correlation_value, 3)))
 ```
- Seguido de esto procedemos a realizar un histograma entre las dos variables, para analizar tendencias a partir del mismo: 
+
+Seguido de esto procedemos a realizar una grafica que representa la distribución de los puntajes según el nivel socioeconómico (NSE) individual de los estudiantes. Cada línea de densidad coloreada representa la distribución de los puntajes para cada nivel socioeconómico. Las áreas bajo las curvas muestran la densidad relativa de los puntajes en el eje x (Puntaje global), lo que permite visualizar cómo se distribuyen los puntajes en relación con los diferentes niveles socioeconómicos.
  
 ```{r c_des_nse_2, fig.align='center'}
 # Gráfico combinado con líneas de densidad ajustadas por clase socioeconómica
@@ -395,8 +402,37 @@ ggplot(data, aes(x = PUNT_GLOBAL, fill = as.factor(ESTU_NSE_INDIVIDUAL))) +
   theme_minimal()
 ```
 
-Del cual podemos concluir que
+En el NSE 1, se identifica una concentración significativa de estudiantes, con una distribución marcadamente sesgada hacia la derecha y una alta leptocurtosis. Su media se encuentra por debajo de los 200 puntos, lo cual es motivo de preocupación. 
+Para el NSE 2, se observa una distribución también leptocúrtica, aunque menos acentuada que en el nivel anterior, con una media que no supera los 250 puntos. 
+En el NSE 3, la distribución tiende a ser más similar a la normal, con una media cercana a los 375 puntos. 
+Por último, el NSE 4 presenta una asimetría negativa y una distribución igualmente leptocúrtica, parecida a la del NSE 1.
 
+El análisis revela una correlación evidente entre el desempeño académico y el nivel socioeconómico (NSE) de los estudiantes. Las observaciones destacan diferencias significativas entre los niveles socioeconómicos:
+
+##### Nivel Socioeconómico 1 (NSE 1)
+* Ausencia de recursos tecnológicos como computadoras e Internet.
+* Hogares con carencias en electrodomésticos.
+* Bajo nivel educativo de los padres, con predominancia de niveles de primaria incompleta.
+* Madres dedicadas a labores domésticas u ocupaciones no calificadas.
+* Bajo consumo de productos como leche, carne y huevos.
+* Escasa tenencia de libros en el hogar.
+
+##### Nivel Socioeconómico 2 (NSE 2)
+* Aunque algunas carencias persisten, hay una leve mejora en el acceso a recursos tecnológicos.
+* Niveles educativos de los padres son más variados, aunque aún predominan niveles de primaria y secundaria incompletos.
+* Incremento en el consumo de productos básicos y la tenencia de libros.
+
+##### Nivel Socioeconómico 3 (NSE 3)
+* Madres con educación secundaria completa y, a veces, niveles técnicos o profesionales.
+* Mayor acceso a recursos tecnológicos y electrodomésticos.
+* Consumo más regular de alimentos y mayor acceso a recursos educativos.
+
+##### Nivel Socioeconómico 4 (NSE 4)
+* Hogares con amplio acceso a recursos tecnológicos como computadoras, internet y consolas de videojuegos.
+* Educación de los padres en niveles profesionales o incluso de postgrado.
+* Consumo regular de alimentos nutritivos y una mejor dotación de recursos educativos.
+
+Este análisis sugiere que las diferencias socioeconómicas influyen significativamente en el acceso a recursos tecnológicos, niveles educativos de los padres, acceso a servicios y bienes, y el consumo de productos básicos. Este análisis refuerza la idea de que el nivel socioeconómico influye en el acceso a recursos y, por ende, en el desempeño académico de los estudiantes.
 
 #### Tipo de colegio
 
