@@ -859,6 +859,10 @@ cat("Para mayor comprensión, la media de puntajes de las pruebas ICFES a nivel 
  
 ```
 
+Estas gráficas brindan mucha información. En primer lugar, se puede observar que en la región andina hay una tendencia a obtener puntajes por encima de la media de 251 puntos, siendo esta la región con mejor desempeño. A su vez, el departamento de Bogotá DC es el departamento con la mejor media de puntajes, siendo esta de 271 puntos.<br>
+Por otro lado, las regiones periféricas de Colombia tienden a tener un desempeño más bajo en las pruebas. Departamentos como Magdalena, La Guajira, Vaupés, Amazonas, entre otros, tienen un desempeño promedio menor a 230. Sin embargo, el departamento con un menor desempeño en las pruebas ICFES es Chocó, con tan solo 207 puntos de media. Esto puede deberse a una educación deficiente o al difícil acceso a recursos en los departamentos teñidos de colores rojizos, de los cuales se tiene conocimiento de su difícil panorama tecnológico, social, económico, entre otras características que pueden ser causantes del bajo rendimiento educativo.<br>
+Finalmente, en el departamento de Santander se puede observar un comportamiento superior a la media en general. Bucaramanga, Floridablanca, Girón y Piedecuesta son los municipios con un mejor rendimiento, evidenciándose un comportamiento ligeramente bajo en las regiones de Puerto Wilches y Puerto Parra.
+
 #### Comparacion zonas urbanas y rurales 
 ¿Existe diferencia entre la educación en zonas urbanas y la educación en zonas rurales?
 
@@ -895,6 +899,8 @@ tmap_arrange(plot_Urbano, plot_Rural, ncol = 2)
 
 ```
 
+Estos dos mapas muestran una realidad social preocupante en Colombia. El único departamento que mantiene su puntaje tanto en zonas rurales como urbanas es Bogotá. Los demás departamentos tienen puntajes más bajos en las zonas rurales, habiendo casos extremos como Guanía, en el cual se tiene un promedio de más de 250 puntos en las zonas urbanas, mientras que en sus zonas rurales los puntajes caen estrepitosamente a valores promedio menores a 200 puntos. Estos datos generan una visión real del abandono de las zonas rurales por parte del país y de la desigualdad que hay en el mismo.<br>
+Estos resultados por parte de la población rural en Colombia pueden deberse a la dificultad de acceso a la educación y a la tecnología, al alto nivel de trabajo infantil que hay en estas zonas, a la falta de oportunidades, entre muchas otras dificultades que viven día a día los habitantes de las zonas rurales de Colombia.
 
 ## Conclusiones
 
