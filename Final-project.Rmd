@@ -942,6 +942,17 @@ Estos resultados por parte de la población rural en Colombia pueden deberse a l
 
 ## Conclusiones
 
+- La matriz de correlación revela patrones significativos entre diversas variables. Destaca la fuerte correlación positiva entre el puntaje global y el desempeño en cada área del conocimiento. Además, se observa una relación positiva entre el nivel socioeconómico y el rendimiento académico, siendo más pronunciada en inglés. Estos hallazgos resaltan la complejidad de los factores que influyen en el rendimiento académico.
+
+- Niveles socioeconómicos más bajos generan preocupación a nivel académico, teniendo puntajes promedio por debajo de los 200 puntos, mientras que, por el contrario, niveles socioeconómicos más altos destacan por un mejor desempeño en las pruebas, teniendo una media cercana a los 375 puntos.
+
+- Se revela una diferencia marcada en el desempeño de los estudiantes de instituciones públicas frente a estudiantes de instituciones privadas, siendo estos últimos ligeramente superiores en todas las áreas del conocimiento. Estas disparidades en el rendimiento académico entre tipos de colegios podrían vincularse con factores socioeconómicos. Es crucial reconocer que las diferencias en el rendimiento académico son multifacéticas y pueden estar influenciadas por factores más allá del tipo de colegio, como el entorno familiar y el acceso a recursos adicionales.
+
+- A medida que los padres alcanzan un mayor nivel educativo, se observa un marcado aumento en los puntajes promedio obtenidos por sus hijos. Esto refuerza la idea de que un entorno educativo favorable puede tener una influencia significativa en los logros académicos. Además, se plantea la posibilidad de que el nivel educativo de los padres refleje desigualdades en el acceso a recursos que respalden el proceso educativo.
+
+- Se confirma que el acceso a un computador o Internet tiene una fuerte influencia en el puntaje académico. Es esencial reconocer que, aunque el acceso a estos recursos puede tener un impacto positivo, el tiempo dedicado a ellos de manera inadecuada puede resultar contraproducente.
+
+- Resulta sorprendente que la dedicación a Internet muestre una correlación positiva con los puntajes obtenidos en las pruebas, contradiciendo la suposición común de que más tiempo en línea implicaría peores resultados. Se observa una relación moderada entre el tiempo dedicado a Internet y los puntajes obtenidos en las pruebas.
 
 - El hábito de la lectura es un factor que puede afectar positivamente a los resultados obtenidos; sin embargo, la diferencia en la mayoría de los casos no es muy significativa. Solo se destaca una diferencia marcada entre leer menos de media hora y más de 2 horas, con un aumento significativo de la media, de 245 a 270 puntos.
 
