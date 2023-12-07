@@ -368,7 +368,7 @@ Es curioso observar que la lectura diaria no tiene una fuerte correlación con l
 
 ### Análisis socioeconómico {.tabset}
 
-Se analiza la correlación entre varias variables, como el nivel socieconomico, el tipo de colegio (público/privado) o (bilingüe/no bilingüe), tiempo de dedicación a la lectura, el nivel educativo de los padres y el puntaje obtenido por los estudiantes.
+Se analiza la correlación entre varias variables, como el nivel socieconomico, el tipo de colegio (público/privado), el nivel educativo de los padres y el puntaje obtenido por los estudiantes.
 
 #### Nivel socioeconómico 
 
@@ -400,12 +400,14 @@ Del cual podemos concluir que
 
 #### Tipo de colegio
 
-Analizamos si el tipo de colegio (público/privado, bilingüe/no bilingüe) se correlaciona con el desempeño académico 
+Analizamos si el tipo de colegio (público/privado) se correlaciona con el desempeño académico intentando responder la siguiente pregunta:  ¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
 
-¿Los estudiantes de ciertos tipos de colegios tienen ventajas o desventajas en sus puntajes?
+Para abordar esta pregunta, primero generamos un cálculo de promedios de todas las áreas que evalúa la prueba agrupados por el tipo de colegio (oficial o no oficial).
+Luego, se reestructuraron los datos en un formato adecuado para un gráfico de barras apiladas. Esta reorganización se realiza utilizando la función pivot_longer para cambiar el formato de las columnas de promedio a un formato largo, donde cada fila representa un área específica con su respectivo promedio para cada tipo de colegio. Después, usamos ggplot para crear el gráfico de barras apiladas.
 
-La gráfica revela diferencias en desempeño por tipo de colegio (oficial/no oficial). 
-Indica una brecha en puntajes, sugiriendo disparidades educativas y socioeconómicas.
+Finalmente, utilizamos la función cor para para calcular la correlación entre el puntaje global y el tipo de colegio para los dos tipos diferentes.
+
+La siguiente gráfica muestra el desempeño promedio en distintas áreas académicas (lectura crítica, matemáticas, ciencias, inglés y sociales) comparando dos tipos de colegios: oficial y no oficial. 
 
 ```{r c_des_tc, fig.align='center'}
 # Calcular el promedio de puntajes por tipo de colegio
@@ -436,14 +438,9 @@ ggplot(stacked_data, aes(x = COLE_NATURALEZA, y = Promedio, fill = Area)) +
   theme(legend.position = "right")
 ```
 
-Se observa que la diferencia en el desempeño promedio por área entre colegios oficiales
-y no oficiales sugiere una desigualdad significativa en la calidad educativa entre
-estos dos tipos de colegios. Los puntajes más altos en colegios no oficiales,
-especialmente en inglés, matemáticas y lectura crítica, indican una posible brecha
-en la calidad educativa entre los dos tipos de instituciones.
+Se observa que la diferencia en el desempeño promedio por área entre colegios oficiales y no oficiales sugiere una desigualdad significativa en la calidad educativa entre estos dos tipos de colegios. Los puntajes más altos en colegios no oficiales, especialmente en inglés, matemáticas y lectura crítica, indican una posible brecha en la calidad educativa entre los dos tipos de instituciones.
 
 ```{r c_des_tc_2} 
-
 # Calcular correlación entre puntajes y tipo de colegio
 correlacion_publico <- cor(data$PUNT_GLOBAL, as.numeric(data$COLE_NATURALEZA == "OFICIAL"))
 
@@ -451,9 +448,7 @@ correlacion_publico <- cor(data$PUNT_GLOBAL, as.numeric(data$COLE_NATURALEZA == 
 correlacion_privado <- cor(data$PUNT_GLOBAL, as.numeric(data$COLE_NATURALEZA == "NO OFICIAL"))
 
 # Mostrar la correlación
-cat("La correlación entre tipo de colegio privado y el puntaje es:", correlacion_privado)
-
-cat("La correlación entre tipo de colegio público y el puntaje es:", correlacion_publico)
+cat("La correlación entre el tipo de colegio privado y el puntaje es:", correlacion_privado)
 ```
 
 La correlación positiva leve pero notable entre el tipo de colegio privado y el
@@ -479,6 +474,15 @@ analizan más adelante.
 Analizamos si el nivel educativo de los padres se relaciona con el desempeño
 académico, intentando responder la siguiente pregunta: ¿Los hijos de padres con
 niveles educativos más altos tienden a obtener mejores puntajes en las pruebas?
+
+Para poder responder esta pregunta tuvimos que realizar el siguiente procedimiendo:
+1. En este caso, se calcula la correlación entre el nivel de educación del padre y de la madre con el puntaje global de los estudiantes, antes de cambiar el tipo de datos de las columnas a factores.
+2. Se hace un mapeo de los valores numéricos que representan el nivel de educación del padre y de la madre se convierten a etiquetas más descriptivas.
+3. Se combinan las columnas del nivel de educación del padre y de la madre en una sola columna para facilitar la representación gráfica.
+4. Se reordenan los niveles en la columna del nivel de educación para que aparezcan de manera lógica en el gráfico de caja.
+5. Se crea un gráfico de caja utilizando los datos combinados. 
+
+Este gráfico muestra la distribución del puntaje global según los niveles de educación de los padres, diferenciando entre el padre y la madre.
 
 ```{r c_des_ne, fig.align='center'}
 # Calcular correlación entre las dos variables antes de cambiar los datos a factores
@@ -521,8 +525,7 @@ educativo nulo o primario, con puntajes que no superan los 250.
 
 ```{r c_des_ne_2}
 # Imprimir el valor de correlación del padre y madre
-print(paste("La correlación entre el nivel educativo del padre y el puntaje es:", round(correlation_padre, 3)))
-print(paste("La correlación entre el nivel educativo de la madre y el puntaje es:", round(correlation_madre, 3)))
+cat("La correlación entre el nivel educativo del padre y la madre con el puntaje es:", round(correlation_padre, 3), "y",  round(correlation_madre, 3), "respectivamente\n")
 ```
 
 Esto se ratifica con una correlación positiva considerable entre el nivel educativo
@@ -580,6 +583,10 @@ correlacion_con_internet <- cor(data_internet$PUNT_GLOBAL, as.numeric(data_inter
 correlacion_sin_internet <- cor(data_internet$PUNT_GLOBAL, as.numeric(data_internet$TieneInternet == "No"))
 ```
 
+El primer diagrama de caja (izquierda) representa la distribución de los puntajes globales entre aquellos que tienen y no tienen computadora.
+
+El segundo diagrama de caja (derecha) hace lo mismo pero para aquellos que tienen y no tienen acceso a Internet.
+
 ```{r c_internet_des, fig.align='center'}
 # Gráfico 1: Puntajes según el acceso a un computador
 plot_pc <- ggplot(data_pc, aes(x = TieneComputador, y = PUNT_GLOBAL, fill = TieneComputador)) +
@@ -614,19 +621,12 @@ en el rendimiento académico. La brecha entre aquellos con y sin acceso a comput
 e Internet es evidente, con puntajes significativamente diferentes.
 
 ```{r c_internet_des_cor}
-# Mostrar la correlación
-cat("La correlación entre tener computador y el puntaje es:", correlacion_con_pc)
-
-cat("La correlación entre no tener computador y el puntaje es:", correlacion_sin_pc)
-
-# Mostrar la correlación
-cat("La correlación entre tener Internet y el puntaje es:", correlacion_con_internet)
-
-cat("La correlación entre no tener Internet y el puntaje es:", correlacion_sin_internet)
+# Mostrar la correlación de no tener los recursos
+cat("La correlación entre tener no computador o Internet y el puntaje son:", correlacion_sin_pc, "y",correlacion_sin_internet, "respectivamente\n")
 ```
 
-Las correlaciones subrayan esta relación: tener estos recursos correlaciona
-positivamente con puntajes más altos. Esto apunta a desigualdades socioeconómicas
+Las correlaciones subrayan esta relación: no tener estos recursos correlaciona
+negativamente con los puntajes. Esto apunta a desigualdades socioeconómicas
 en el acceso a recursos, impactando la calidad educativa y evidenciando la importancia
 de cerrar estas brechas para una educación equitativa. 
 
@@ -655,6 +655,8 @@ Posterior a esto, se hace la gráfica de "dedicacion_internet" vs "punt_global" 
 función geom_boxplot de ggplot. 
 
 Por último, se hace el cálculo de la correlación entre el puntaje y la dedicación a internet.
+
+La siguiente gráfica muestra la distribución de los puntajes globales en función del tiempo dedicado a actividades en Internet, excluyendo las académicas, por parte de los estudiantes.
 
 ```{r c_des_dint, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes
