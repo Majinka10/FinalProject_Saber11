@@ -345,6 +345,7 @@ corrplot::corrplot(correlation_matrix, type = "lower", tl.cex=0.7)
 horas_trabajo.ejecutado <- FALSE
 lectura_diaria.ejecutado <- FALSE
 dedicacion_internet.ejecutado <- FALSE
+horas_trabajo.ejecutado <- FALSE
 ```
 
 #### Qué se observa
@@ -674,12 +675,21 @@ cat("La correlación entre el tiempo dedicado a leer y el puntaje es:", correlac
 
 ```
 
-##### Qué se observa
-No hay una gran diferencia en los puntajes promedio de las personas que no leen por entretenimiento y las que leen 30 minutos o menos. la media de ambos varía de 245 puntos a 248.
+No hay una gran diferencia en los puntajes promedio de las personas que no leen por entretenimiento y las que leen 30 minutos o menos, lo que indica que una lectura de menos de 30 minutos no genera un alto impacto en el puntaje.De igual forma, la diferencia entre leer 30 a 60 minutos y leer entre 1 y 2 horas no es muy significativa. Incluso se puede observar un muy ligero descenso.  
+Mientras que, la diferencia mas grande de puntajes promedio respecto de los demás lo tienen las personas que leen más de 2 horas diarias, siendo notablemente superior que el promedio de las personas que leen entre 1 y 2 horas.
+```{r prom3}
+  prom_no_leen <- mean(matrix_df$punt_global[matrix_df$lectura_diaria == "No leo por entretenimiento"], na.rm = TRUE)
+  prom_30_min <- mean(matrix_df$punt_global[matrix_df$lectura_diaria == "30 minutos o menos"], na.rm = TRUE)
+  prom_60min <- mean(matrix_df$punt_global[matrix_df$lectura_diaria == "Entre 30 y 60 minutos"], na.rm = TRUE)
+  prom_2horas <- mean(matrix_df$punt_global[matrix_df$lectura_diaria == "Entre 1 y 2 horas"], na.rm = TRUE)
+  prom_mas2horas <- mean(matrix_df$punt_global[matrix_df$lectura_diaria == "Más de 2 horas"], na.rm = TRUE)
+  
+  cat("la media de puntajes de personas que no leen por entretenimiento es de ",prom_no_leen,",y para personas que leen 30 minutos o menos es de",prom_30_min, "\n")
 
-De igual forma, la diferencia entre leer 30 a 60 minutos y leer entre 1 y 2 horas no es muy significativa. Incluso se puede observar un muy ligero descenso, siendo la media de 263 y 261, respectivamente.
-
-Mientras que la media de puntajes de quienes leen más de 2 horas diarias es de 270 puntos.
+  cat("la media de puntajes de personas que leen de 30 a 60 minuros es de ",prom_60min,",y para personas que leen de 1 a 2 horas es de ",prom_2horas, "\n")
+  
+  cat("la media de puntajes de personas que leen mas de 2 horas diarias es de ",prom_mas2horas, "\n")
+```
 
 Si bien la diferencia entre algunos niveles y sus niveles posteriores no es muy amplia, si se observa la diferencia en bloques de 0 a 30 minutos, 30 minutos a 2 horas y mas de 2 horas de lectura diaria. Hay sobre todo una diferencia radical entre leer menos de media hora y leer mas de 2 horas, pasando de una media de 245 a una de 270 puntos.
 
@@ -721,8 +731,9 @@ que reciben pago en efectivo, especie o ambas; el otro valor en esta columna es 
 
 ```{r c_des_dtrab_2, fig.align='center'}
 # Mapear los valores numéricos a sus etiquetas correspondientes para tipo de remuneración
-matrix_df$tipo_remuneracion <- factor(matrix_df$tipo_remuneracion, levels = c(1, 2, 3, 4),
+  matrix_df$tipo_remuneracion <- factor(matrix_df$tipo_remuneracion, levels = c(1, 2, 3, 4),
                                    labels = c("No", "Si, en efectivo", "Si, en efectivo y especie", "Si, en especie"))
+
 
 # Agrupar los estudiantes por tipo de remuneración
 trabajo_mas_20_horas <- matrix_df %>%
@@ -742,6 +753,10 @@ ggplot(trabajo_mas_20_horas, aes(x = Tipo_Remuneracion_Agrupado)) +
        y = "Cantidad de estudiantes")
 ```
 
+A nivel académico, se puede observar que el trabajar afecta en cierta medida los puntajes obtenidos en las pruebas, descendiendo el puntaje promedio de 261 puntos para personas que no trabajan a 228 para personas que trabajan más de 30 horas semanales, un cambio bastante significativo.
+
+Pero esto impacta aún más cuando se analiza que la edad media de las personas que presentan este examen es entre 16 y 18 años. Por ende, se puede intuir que hay jóvenes que se ven forzados a dejar sus estudios de lado para conseguir un empleo, siendo esto a su vez influyente en el puntaje obtenido en sus pruebas ICFES y, probablemente, en su futuro, ya que estas pruebas son decisivas a la hora de entrar a una universidad pública o "de bajo costo", la cual quizá sea su única oportunidad para acceder a un nivel de educación superior.
+
 ### Análisis demografico {.tabset}
 
 #### Promedio de notas en deptos y municipio
@@ -756,11 +771,6 @@ JOIN entre el mapa y los puntajes.<br>
 Graficación.
 
 ```{r Promedio de notas en los departamentos de Colombia y municipios de Santander, fig.align='center'}
-
-library(sf) # trabajar con tipos de datos geográficos
-library(dplyr) # realizar JOIN
-library(tmap) # graficar mapas
-
 ## Cargando el mapa respectivo
 map_departamentos <- st_read("MGN2022_DPTO_POLITICO/MGN_DPTO_POLITICO.shp")
 map_municipios <- st_read("MGN2022_MPIO_POLITICO/MGN_MPIO_POLITICO.shp")
